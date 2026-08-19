@@ -1,0 +1,130 @@
+```html
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Admin Dashboard | AM Pro Toolkit</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root { --bg:#000308; --panel:rgba(2,12,24,.90); --line:rgba(0,255,255,.25); }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { margin:0; min-height:100vh; color:#f8fafc; background: radial-gradient(circle at 50% 10%, rgba(0,255,255,.15), transparent 40%), var(--bg); font-family:Inter,sans-serif; padding:12px; }
+input { width:100%; color:#f8fafc!important; background:rgba(0,5,12,.9)!important; border:1px solid rgba(0,255,255,.25)!important; border-radius:12px!important; outline:none; }
+.glass { background:var(--panel); border:1px solid var(--line); backdrop-filter:blur(20px); box-shadow:0 20px 50px rgba(0,0,0,.6); }
+.btn { border-radius:12px; transition:all .15s ease; cursor:pointer; font-weight:700; }
+.hidden { display:none!important; }
+</style>
+</head>
+<body class="max-w-md mx-auto w-full">
+
+<header class="glass rounded-2xl p-4 flex items-center justify-between my-2">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-400 flex items-center justify-center text-cyan-400">
+      <i class="fa-solid fa-shield-halved"></i>
+    </div>
+    <div>
+      <div class="font-bold text-sm text-white">Admin Panel</div>
+      <div class="text-[10px] text-cyan-400">v2.5 Secure</div>
+    </div>
+  </div>
+  <button onclick="window.location.href='/'" class="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs">Kembali</button>
+</header>
+
+<main class="py-4">
+  <div id="loginBox" class="glass rounded-2xl p-5 space-y-4">
+    <h2 class="font-bold text-sm text-cyan-400 mb-2"><i class="fa-solid fa-lock mr-2"></i>Login Administrator</h2>
+    <div>
+      <label class="block text-[11px] text-cyan-200 mb-1">Username Admin</label>
+      <input type="text" id="admUser" placeholder="Username" class="p-3 text-xs">
+    </div>
+    <div>
+      <label class="block text-[11px] text-cyan-200 mb-1">Password Admin</label>
+      <input type="password" id="admPass" placeholder="Password" class="p-3 text-xs">
+    </div>
+    <button onclick="loginAdmin()" class="btn w-full py-3 text-xs bg-cyan-400 text-black font-bold">Masuk Dashboard</button>
+  </div>
+
+  <div id="dashBox" class="hidden space-y-4">
+    <div class="flex justify-between items-center glass p-4 rounded-2xl">
+      <div>
+        <div class="text-xs font-bold text-white">Statistik Server</div>
+        <div class="text-[10px] text-emerald-400">Supabase Connected</div>
+      </div>
+      <button onclick="loadStats()" class="px-3 py-1.5 bg-cyan-500/20 border border-cyan-400 text-cyan-300 text-xs rounded-xl">Refresh</button>
+    </div>
+
+    <div id="statsGrid" class="grid grid-cols-2 gap-3"></div>
+
+    <div class="glass rounded-2xl p-4 overflow-x-auto">
+      <h3 class="font-bold text-xs text-cyan-300 mb-3">Daftar Pengguna Terdaftar</h3>
+      <table class="w-full text-left text-[11px]">
+        <thead>
+          <tr class="text-cyan-400 border-b border-white/10 pb-2">
+            <th class="pb-2">Username</th>
+            <th class="pb-2">Kredit</th>
+            <th class="pb-2">Tanggal</th>
+          </tr>
+        </thead>
+        <tbody id="tblUsers"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<script>
+async function loginAdmin() {
+  const u = document.getElementById('admUser').value.trim();
+  const p = document.getElementById('admPass').value.trim();
+  if(!u || !p) return alert('Isi username & password.');
+
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({action: 'admin_login', username: u, password: p})
+    });
+    const d = await res.json();
+    if(d.status) {
+      localStorage.setItem('adm_token', d.token);
+      document.getElementById('loginBox').classList.add('hidden');
+      document.getElementById('dashBox').classList.remove('hidden');
+      loadStats();
+    } else {
+      alert(d.error || 'Login admin gagal.');
+    }
+  } catch(e) { alert('Kesalahan server.'); }
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch('/api/admin?action=stats', {
+      headers: {'Authorization': 'Bearer ' + localStorage.getItem('adm_token')}
+    });
+    const d = await res.json();
+    if(d.status) {
+      document.getElementById('statsGrid').innerHTML = `
+        <div class="glass p-4 rounded-2xl"><div class="text-[10px] text-slate-400">Total User</div><div class="text-lg font-bold text-cyan-300 mt-1">${d.totalUsers}</div></div>
+        <div class="glass p-4 rounded-2xl"><div class="text-[10px] text-slate-400">Total Devices</div><div class="text-lg font-bold text-emerald-300 mt-1">${d.totalDevices}</div></div>
+      `;
+      let rows = '';
+      d.users.forEach(u => {
+        rows += `<tr class="border-b border-white/5"><td class="py-2">${u.username}</td><td class="py-2">${u.credits}/3</td><td class="py-2">${new Date(u.created_at).toLocaleDateString()}</td></tr>`;
+      });
+      document.getElementById('tblUsers').innerHTML = rows;
+    }
+  } catch(e) {}
+}
+
+if(localStorage.getItem('adm_token')) {
+  document.getElementById('loginBox').classList.add('hidden');
+  document.getElementById('dashBox').classList.remove('hidden');
+  loadStats();
+}
+</script>
+</body>
+</html>
+```
