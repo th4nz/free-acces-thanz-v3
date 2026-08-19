@@ -1,0 +1,11 @@
+{
+  "name": "am-pro-toolkit",
+  "version": "2.5.0",
+  "description": "AM Pro Toolkit Serverless with Supabase & Vercel",
+  "main": "index.html",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {},
+  "private": true
+}
