@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Method not allowed' });
 
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -34,6 +34,22 @@ export default async function handler(req, res) {
     });
 
     const upResult = await upstream.json();
+    if (!upstream.ok || upResult.status === false) {
+      await supabase.from('usage_logs').insert({ user_id: user.id, action: 'inject', status: 'failed', credits_used: 0 });
+      return res.status(400).json({ status: false, error: upResult.error || 'Verifikasi upstream gagal.' });
+    }
+
+    const { data: success, error: rpcErr } = await supabase.rpc('deduct_user_credit', { p_user_id: user.id });
+    if (rpcErr || !success) {
+      return res.status(400).json({ status: false, error: 'Kredit Anda sudah habis atau limit 24 jam tercapai.' });
+    }
+
+    await supabase.from('usage_logs').insert({ user_id: user.id, action: 'inject', status: 'success', credits_used: 1 });
+    return res.status(200).json({ status: true, message: 'Berhasil diaktifkan!' });
+  } catch (err) {
+    return res.status(500).json({ status: false, error: err.message });
+  }
+};
     if (!upstream.ok || upResult.status === false) {
       await supabase.from('usage_logs').insert({ user_id: user.id, action: 'inject', status: 'failed', credits_used: 0 });
       return res.status(400).json({ status: false, error: upResult.error || 'Verifikasi upstream gagal.' });
