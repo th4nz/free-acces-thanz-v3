@@ -1,7 +1,6 @@
 {
   "name": "am-pro-toolkit",
-  "version": "2.5.0",
-  "description": "AM Pro Toolkit Serverless",
+  "version": "2.5.2",
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
   }
