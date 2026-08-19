@@ -1,6 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+const { createClient } = require('@supabase/supabase-js');
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Method not allowed' });
   
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -38,26 +38,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ status: false, error: err.message });
   }
-}
-    const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ status: false, error: 'Email wajib diisi.' });
-    }
-
-    // Panggil API Upstream Eksternal
-    const upstreamRes = await fetch(`${API_BASE_URL}/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${API_KEY}`
-      },
-      body: JSON.stringify({ email })
-    });
-
-    const upstreamData = await upstreamRes.json();
-    return res.status(200).json({ status: true, message: 'Magic link berhasil dikirim', data: upstreamData });
-
-  } catch (err) {
-    return res.status(500).json({ status: false, error: 'Internal server error: ' + err.message });
-  }
-}
+};
