@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="id" class="dark">
 <head>
@@ -6,12 +7,12 @@
 <meta name="theme-color" content="#000000">
 <title>AM Pro Toolkit | ThanzDev</title>
 
-<script src="[https://cdn.tailwindcss.com](https://cdn.tailwindcss.com)"></script>
-<script src="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js)"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
 
-<link rel="preconnect" href="[https://fonts.googleapis.com](https://fonts.googleapis.com)">
-<link rel="preconnect" href="[https://fonts.gstatic.com](https://fonts.gstatic.com)" crossorigin>
-<link href="[https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap](https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap)" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Permanent+Marker&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
 
 <script>
 tailwind.config = {
@@ -65,7 +66,7 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
 .btn-success { background:linear-gradient(135deg,#059669,#047857); color:white; border:1px solid rgba(110,231,183,.3); box-shadow:0 4px 15px rgba(5,150,105,.35); }
 .btn-ghost { background:rgba(255,255,255,.035); border:1px solid rgba(0,255,255,.15); color:#a5f3fc; }
 .auth-tabs { padding:4px; background:rgba(255,255,255,.025); border:1px solid rgba(0,255,255,.15); }
-.auth-tab { color:#64748b; transition:.2s ease; cursor:pointer; }
+.auth-tab { color:#64748b; transition:.2s ease; cursor:pointer; text-align:center; }
 .auth-tab.active { color:#000308; background:linear-gradient(135deg,#00FFFF,#0891b2); font-weight:700; box-shadow:0 4px 18px rgba(0,255,255,.4); }
 .section-label { color:#00FFFF; font-size:9px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; text-shadow:0 0 10px rgba(0,255,255,.4); }
 .usage-track { height:6px; overflow:hidden; border-radius:999px; background:rgba(255,255,255,.06); }
@@ -77,12 +78,12 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
 </style>
 </head>
 
-<body class="min-h-screen px-3 py-3 sm:px-5 sm:py-5">
+<body class="min-h-screen px-3 py-3 sm:px-5 sm:py-5 flex flex-col justify-between">
 
 <div class="ambient one"></div>
 <div class="ambient two"></div>
 
-<div class="w-full max-w-2xl mx-auto flex min-h-[calc(100vh-24px)] flex-col justify-between">
+<div class="w-full max-w-2xl mx-auto flex flex-col flex-1 justify-between gap-4">
 
 <!-- HEADER -->
 <header class="topbar glass rounded-[16px] px-4 py-3.5 flex items-center justify-between shrink-0">
@@ -107,73 +108,73 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
 </header>
 
 <!-- MAIN -->
-<main class="flex-1 flex flex-col justify-center py-5">
+<main class="flex-1 flex flex-col justify-center py-2">
 
   <!-- AUTH SECTION -->
   <section id="authSection" class="w-full max-w-md mx-auto">
-    <div class="text-center mb-5">
-      <div class="section-label mb-2">WELCOME ALL, SELAMAT MEMAKAI FITURNYA</div>
-      <h1 class="font-marker font-normal text-[26px] sm:text-[30px] text-white tracking-wide py-1">Aktivasi</h1>
-      <p class="text-[11px] text-[#64748b] mt-1.5">©THANZ DEV SINCE 2026</p>
+    <div class="text-center mb-4">
+      <div class="section-label mb-1">WELCOME ALL, SELAMAT MEMAKAI FITURNYA</div>
+      <h1 class="font-marker font-normal text-[24px] sm:text-[28px] text-white tracking-wide py-0.5">Aktivasi</h1>
+      <p class="text-[10px] text-[#64748b] mt-1">©THANZ DEV SINCE 2026</p>
     </div>
 
     <div class="auth-tabs rounded-[13px] grid grid-cols-2 gap-1 mb-3">
-      <button class="auth-tab active py-2.5 rounded-[9px] text-[11px]" onclick="switchTab('login')" id="loginTab">Login</button>
-      <button class="auth-tab py-2.5 rounded-[9px] text-[11px]" onclick="switchTab('register')" id="registerTab">Register</button>
+      <button class="auth-tab active py-2 rounded-[9px] text-[11px]" onclick="switchTab('login')" id="loginTab">Login</button>
+      <button class="auth-tab py-2 rounded-[9px] text-[11px]" onclick="switchTab('register')" id="registerTab">Register</button>
     </div>
 
     <!-- LOGIN FORM -->
-    <div id="loginCard" class="glass rounded-[16px] p-5 sm:p-6">
-      <div class="flex items-center justify-between mb-5">
+    <div id="loginCard" class="glass rounded-[16px] p-4 sm:p-6">
+      <div class="flex items-center justify-between mb-4">
         <div>
-          <div class="section-label mb-1.5">Account</div>
-          <h2 class="font-display font-bold text-[14px] text-white">Masuk ke akun</h2>
+          <div class="section-label mb-1">Account</div>
+          <h2 class="font-display font-bold text-[13px] text-white">Masuk ke akun</h2>
         </div>
-        <div class="w-8 h-8 rounded-[10px] glass-soft flex items-center justify-center text-[#00FFFF]">
-          <i class="fa-solid fa-arrow-right-to-bracket text-[11px]"></i>
+        <div class="w-7 h-7 rounded-[10px] glass-soft flex items-center justify-center text-[#00FFFF]">
+          <i class="fa-solid fa-arrow-right-to-bracket text-[10px]"></i>
         </div>
       </div>
 
-      <div class="space-y-3.5">
+      <div class="space-y-3">
         <div>
-          <label class="block text-[10px] font-medium text-[#cffafe] mb-1.5">Username</label>
-          <input type="text" id="loginUser" placeholder="Masukkan username" class="px-3.5 py-3 text-[11px]">
+          <label class="block text-[10px] font-medium text-[#cffafe] mb-1">Username</label>
+          <input type="text" id="loginUser" placeholder="Masukkan username" class="px-3.5 py-2.5 text-[11px]">
         </div>
         <div>
-          <label class="block text-[10px] font-medium text-[#cffafe] mb-1.5">Password</label>
-          <input type="password" id="loginPass" placeholder="Masukkan password" class="px-3.5 py-3 text-[11px]">
+          <label class="block text-[10px] font-medium text-[#cffafe] mb-1">Password</label>
+          <input type="password" id="loginPass" placeholder="Masukkan password" class="px-3.5 py-2.5 text-[11px]">
         </div>
-        <button id="submitLogin" class="btn btn-primary w-full py-3 text-[11px]">Login</button>
+        <button id="submitLogin" class="btn btn-primary w-full py-2.5 text-[11px] mt-1">Login</button>
       </div>
     </div>
 
     <!-- REGISTER FORM -->
-    <div id="registerCard" class="glass rounded-[16px] p-5 sm:p-6 hidden">
-      <div class="flex items-center justify-between mb-5">
+    <div id="registerCard" class="glass rounded-[16px] p-4 sm:p-6 hidden">
+      <div class="flex items-center justify-between mb-4">
         <div>
-          <div class="section-label mb-1.5">Self Registration</div>
-          <h2 class="font-display font-bold text-[14px] text-white">Buat Akun Baru</h2>
+          <div class="section-label mb-1">Self Registration</div>
+          <h2 class="font-display font-bold text-[13px] text-white">Buat Akun Baru</h2>
         </div>
-        <div class="w-8 h-8 rounded-[10px] glass-soft flex items-center justify-center text-[#00FFFF]">
-          <i class="fa-solid fa-user-plus text-[11px]"></i>
+        <div class="w-7 h-7 rounded-[10px] glass-soft flex items-center justify-center text-[#00FFFF]">
+          <i class="fa-solid fa-user-plus text-[10px]"></i>
         </div>
       </div>
 
-      <div id="regAlertBox" class="mb-4 p-3 rounded-[11px] bg-[#00FFFF]/[.05] border border-[#00FFFF]/[.2] flex gap-2.5">
-        <i class="fa-solid fa-circle-info text-[#00FFFF] text-[11px] mt-0.5"></i>
-        <p class="text-[10px] leading-relaxed text-cyan-200/80">1 Perangkat hanya dapat mendaftarkan 1 akun untuk selamanya (Device Binding Server-Side).</p>
+      <div id="regAlertBox" class="mb-3 p-2.5 rounded-[11px] bg-[#00FFFF]/[.05] border border-[#00FFFF]/[.2] flex gap-2">
+        <i class="fa-solid fa-circle-info text-[#00FFFF] text-[10px] mt-0.5"></i>
+        <p class="text-[9px] leading-relaxed text-cyan-200/80">1 Perangkat hanya dapat mendaftarkan 1 akun untuk selamanya (Device Binding Server-Side).</p>
       </div>
 
-      <div class="space-y-3.5">
+      <div class="space-y-3">
         <div>
-          <label class="block text-[10px] font-medium text-[#cffafe] mb-1.5">Username Pilihan</label>
-          <input type="text" id="regUser" placeholder="contoh: thanzuser" class="px-3.5 py-3 text-[11px]">
+          <label class="block text-[10px] font-medium text-[#cffafe] mb-1">Username Pilihan</label>
+          <input type="text" id="regUser" placeholder="contoh: thanzuser" class="px-3.5 py-2.5 text-[11px]">
         </div>
         <div>
-          <label class="block text-[10px] font-medium text-[#cffafe] mb-1.5">Password Pilihan</label>
-          <input type="password" id="regPass" placeholder="Buat password" class="px-3.5 py-3 text-[11px]">
+          <label class="block text-[10px] font-medium text-[#cffafe] mb-1">Password Pilihan</label>
+          <input type="password" id="regPass" placeholder="Buat password" class="px-3.5 py-2.5 text-[11px]">
         </div>
-        <button id="submitRegister" class="btn btn-success w-full py-3 text-[11px] font-bold">Daftar Akun Permanen</button>
+        <button id="submitRegister" class="btn btn-success w-full py-2.5 text-[11px] font-bold mt-1">Daftar Akun Permanen</button>
       </div>
     </div>
   </section>
@@ -183,46 +184,46 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
     <div class="glass rounded-[16px] p-4 sm:p-5 mb-3">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-[12px] flex items-center justify-center text-[#00FFFF] font-bold text-xs brand-mark">U</div>
+          <div class="w-9 h-9 rounded-[12px] flex items-center justify-center text-[#00FFFF] font-bold text-xs brand-mark">U</div>
           <div>
-            <div id="loggedInUsername" class="font-display font-bold text-[13px] text-white"></div>
-            <div class="flex items-center gap-1.5 mt-1 text-[9px] text-emerald-400">
+            <div id="loggedInUsername" class="font-display font-bold text-[12px] text-white"></div>
+            <div class="flex items-center gap-1.5 mt-0.5 text-[9px] text-emerald-400">
               <span class="status-dot w-1.5 h-1.5 rounded-full bg-emerald-400"></span> Sesi Aktif Server
             </div>
           </div>
         </div>
-        <button id="userLogoutBtn" class="btn btn-ghost px-3 py-2 text-[9px]">
+        <button id="userLogoutBtn" class="btn btn-ghost px-3 py-1.5 text-[9px]">
           <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
         </button>
       </div>
 
-      <div class="mt-5 pt-4 border-t border-white/[.06]">
+      <div class="mt-4 pt-3 border-t border-white/[.06]">
         <div class="flex items-center justify-between mb-2">
           <div>
             <div class="section-label">Credit Status</div>
-            <div id="injectCreditStatus" class="mt-1 font-display font-bold text-[12px] text-emerald-400">Loading...</div>
+            <div id="injectCreditStatus" class="mt-1 font-display font-bold text-[11px] text-emerald-400">Loading...</div>
           </div>
           <div class="text-right">
             <div class="section-label">Limit Sistem</div>
             <div class="text-[10px] text-[#00FFFF] mt-1">3x / 24 Jam</div>
           </div>
         </div>
-        <div class="usage-track mt-3"><div id="usageBarEl" class="usage-bar" style="width: 100%;"></div></div>
+        <div class="usage-track mt-2"><div id="usageBarEl" class="usage-bar" style="width: 100%;"></div></div>
       </div>
     </div>
 
     <!-- TOOLBOX INJECT -->
     <div class="glass rounded-[16px] overflow-hidden p-4 sm:p-5">
-      <div class="mb-4">
-        <div class="section-label mb-1.5">Magic Link Engine</div>
-        <h2 class="font-display font-bold text-[14px] text-white">Aktivasi Alight Motion</h2>
-        <p class="text-[10px] text-[#64748b] mt-1">Masukkan email aktif untuk menerima magic link.</p>
+      <div class="mb-3">
+        <div class="section-label mb-1">Magic Link Engine</div>
+        <h2 class="font-display font-bold text-[13px] text-white">Aktivasi Alight Motion</h2>
+        <p class="text-[9px] text-[#64748b] mt-0.5">Masukkan email aktif untuk menerima magic link.</p>
       </div>
 
       <!-- STEP 1: SEND EMAIL -->
       <div id="emailSection" class="space-y-3">
-        <input type="email" id="emailInput" placeholder="email@domain.com" class="px-3.5 py-3 text-[11px]">
-        <button id="sendBtn" class="btn btn-primary w-full py-3 text-[11px]">
+        <input type="email" id="emailInput" placeholder="email@domain.com" class="px-3.5 py-2.5 text-[11px]">
+        <button id="sendBtn" class="btn btn-primary w-full py-2.5 text-[11px]">
           <i class="fa-solid fa-paper-plane mr-1.5"></i> Kirim Magic Link
         </button>
       </div>
@@ -233,8 +234,8 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
           <label class="text-[10px] text-cyan-300">Tempel Magic Link</label>
           <button id="changeEmailBtn" class="text-[9px] text-[#00FFFF] hover:underline">Ganti Email</button>
         </div>
-        <input type="url" id="magicInput" placeholder="https://..." class="px-3.5 py-3 text-[11px]">
-        <button id="activateBtn" class="btn btn-primary w-full py-3 text-[11px]">
+        <input type="url" id="magicInput" placeholder="https://..." class="px-3.5 py-2.5 text-[11px]">
+        <button id="activateBtn" class="btn btn-primary w-full py-2.5 text-[11px]">
           <span id="btnDefault">Proses Aktivasi Inject (-1 Kredit)</span>
           <span id="loaderContainer" class="hidden">Memproses...</span>
           <span id="btnSuccess" class="hidden text-emerald-300">✓ Berhasil Diaktifkan!</span>
@@ -245,7 +246,7 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
 
 </main>
 
-<footer class="text-center pb-2 pt-1">
+<footer class="text-center py-2 shrink-0">
   <div class="text-[9px] text-[#64748b]">AM Pro Toolkit <span class="mx-1 text-[#00FFFF]/55">•</span> Secure API <span class="mx-1 text-[#00FFFF]/55">•</span> ThanzDev</div>
 </footer>
 </div>
@@ -406,9 +407,9 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
                 injectCreditStatus.textContent = `Tersedia (${credits}/3 Kredit)`;
                 usageBarEl.style.width = `${(credits / 3) * 100}%`;
                 if(credits === 0) {
-                    injectCreditStatus.className = "mt-1 font-display font-bold text-[12px] text-rose-400";
+                    injectCreditStatus.className = "mt-1 font-display font-bold text-[11px] text-rose-400";
                 } else {
-                    injectCreditStatus.className = "mt-1 font-display font-bold text-[12px] text-emerald-400";
+                    injectCreditStatus.className = "mt-1 font-display font-bold text-[11px] text-emerald-400";
                 }
             }
         } catch(e) {}
@@ -458,7 +459,7 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
                 headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`}, 
                 body: JSON.stringify({email: cachedEmail, magicLink: magic}) 
             });
-            const data = await res.json();
+            const data = res.headers.get("content-type")?.includes("application/json") ? await res.json() : { status: false, error: 'Server response error' };
             if (data.status) {
                 loaderContainer.classList.add('hidden');
                 btnSuccess.classList.remove('hidden');
@@ -480,3 +481,4 @@ input:focus, select:focus { border-color:#00FFFF!important; box-shadow:0 0 0 3px
 </script>
 </body>
 </html>
+```
