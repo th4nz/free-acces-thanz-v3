@@ -191,7 +191,10 @@ async function doRegister() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({action: 'register', username: u, password: p, device_id: getDevId()})
     });
-    const d = await res.json();
+    const text = await res.text();
+    let d;
+    try { d = JSON.parse(text); } catch(err) { return showToast('Error server: Respon tidak valid.'); }
+    
     if(d.status) {
       alert('Registrasi Berhasil! Perangkat terkunci permanen.');
       switchTab('login');
@@ -212,7 +215,10 @@ async function doLogin() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({action: 'login', username: u, password: p, device_id: getDevId()})
     });
-    const d = await res.json();
+    const text = await res.text();
+    let d;
+    try { d = JSON.parse(text); } catch(err) { return showToast('Error server: Respon tidak valid.'); }
+
     if(d.status) {
       localStorage.setItem('am_token', d.token);
       localStorage.setItem('am_user', d.username);
@@ -247,7 +253,9 @@ async function loadStatus() {
   const user = localStorage.getItem('am_user');
   try {
     const res = await fetch(`/api/admin?action=status&username=${encodeURIComponent(user)}`);
-    const d = await res.json();
+    const text = await res.text();
+    let d;
+    try { d = JSON.parse(text); } catch(err) { return; }
     if(d.status) {
       document.getElementById('dispCredit').textContent = `${d.credits} / 3 Kredit`;
     }
@@ -265,7 +273,10 @@ async function sendMagic() {
       headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
       body: JSON.stringify({email})
     });
-    const d = await res.json();
+    const text = await res.text();
+    let d;
+    try { d = JSON.parse(text); } catch(err) { return showToast('Error server: Respon API tidak valid.'); }
+
     if(d.status) {
       cachedEmail = email;
       document.getElementById('stepSend').classList.add('hidden');
@@ -292,7 +303,10 @@ async function verifyMagic() {
       headers: {'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`},
       body: JSON.stringify({email: cachedEmail, magicLink: magic})
     });
-    const d = await res.json();
+    const text = await res.text();
+    let d;
+    try { d = JSON.parse(text); } catch(err) { return showToast('Error server: Respon verifikasi tidak valid.'); }
+
     if(d.status) {
       alert('Berhasil! 1 Kredit telah dikurangi.');
       resetStep();
