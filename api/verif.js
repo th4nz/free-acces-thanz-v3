@@ -1,20 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const API_BASE_URL = process.env.API_BASE_URL;
-const API_KEY = process.env.API_KEY;
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ status: false, error: 'Method not allowed' });
+  if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Method not allowed' });
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const API_BASE_URL = process.env.API_BASE_URL;
+  const API_KEY = process.env.API_KEY;
+
+  if (!supabaseUrl || !supabaseKey || !API_BASE_URL || !API_KEY) {
+    return res.status(500).json({ status: false, error: 'Konfigurasi Server Environment Variables belum lengkap.' });
   }
 
-  if (!API_BASE_URL || !API_KEY) {
-    return res.status(500).json({ status: false, error: 'API_BASE_URL belum dikonfigurasi.' });
-  }
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     const authHeader = req.headers.authorization;
@@ -23,18 +21,35 @@ export default async function handler(req, res) {
     }
     const token = authHeader.split(' ')[1];
 
-    const { data: profile, error: profileErr } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('username', token)
-      .single();
-
-    if (profileErr || !profile) {
-      return res.status(401).json({ status: false, error: 'Unauthorized user session.' });
-    }
+    const { data: user } = await supabase.from('profiles').select('*').eq('username', token).single();
+    if (!user) return res.status(401).json({ status: false, error: 'Sesi user tidak valid.' });
 
     const { email, magicLink } = req.body;
-    if (!email || !magicLink) {
+    if (!email || !magicLink) return res.status(400).json({ status: false, error: 'Data tidak lengkap.' });
+
+    const upstream = await fetch(`${API_BASE_URL}/verif`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+      body: JSON.stringify({ email, magicLink })
+    });
+
+    const upResult = await upstream.json();
+    if (!upstream.ok || upResult.status === false) {
+      await supabase.from('usage_logs').insert({ user_id: user.id, action: 'inject', status: 'failed', credits_used: 0 });
+      return res.status(400).json({ status: false, error: upResult.error || 'Verifikasi upstream gagal.' });
+    }
+
+    const { data: success, error: rpcErr } = await supabase.rpc('deduct_user_credit', { p_user_id: user.id });
+    if (rpcErr || !success) {
+      return res.status(400).json({ status: false, error: 'Kredit Anda sudah habis atau limit 24 jam tercapai.' });
+    }
+
+    await supabase.from('usage_logs').insert({ user_id: user.id, action: 'inject', status: 'success', credits_used: 1 });
+    return res.status(200).json({ status: true, message: 'Berhasil diaktifkan!' });
+  } catch (err) {
+    return res.status(500).json({ status: false, error: err.message });
+  }
+}    if (!email || !magicLink) {
       return res.status(400).json({ status: false, error: 'Email dan Magic Link wajib diisi.' });
     }
 
