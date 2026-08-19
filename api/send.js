@@ -1,8 +1,10 @@
 const { createClient } = require('@supabase/supabase-js');
 
-module.exports = async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ status: false, error: 'Method not allowed' });
-  
+module.exports = async (req, res) => {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ status: false, error: 'Method not allowed' });
+  }
+
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   const API_BASE_URL = process.env.API_BASE_URL;
@@ -21,11 +23,15 @@ module.exports = async function handler(req, res) {
     }
     const token = authHeader.split(' ')[1];
 
-    const { data: user } = await supabase.from('profiles').select('*').eq('username', token).single();
-    if (!user) return res.status(401).json({ status: false, error: 'Sesi user tidak valid.' });
+    const { data: user, error: userErr } = await supabase.from('profiles').select('*').eq('username', token).single();
+    if (userErr || !user) {
+      return res.status(401).json({ status: false, error: 'Sesi user tidak valid.' });
+    }
 
     const { email } = req.body;
-    if (!email) return res.status(400).json({ status: false, error: 'Email wajib diisi.' });
+    if (!email) {
+      return res.status(400).json({ status: false, error: 'Email wajib diisi.' });
+    }
 
     const upstream = await fetch(`${API_BASE_URL}/send`, {
       method: 'POST',
