@@ -175,7 +175,7 @@
     </div>
 </div>
 
-<!-- ===== FUNGSI UI (TETAP SAMA) ===== -->
+<!-- ===== FUNGSI UI ===== -->
 <script>
 function toggleThemePanel(){ document.getElementById('themePanel').classList.toggle('open'); }
 function toggleCustomBuilder(){ document.getElementById('customBuilder').classList.toggle('active'); }
@@ -188,47 +188,78 @@ function setAccent(base, hi, dim, el){ const root=document.documentElement.style
 function updateCustomGradient(){ const startHex=document.getElementById('gradStart').value; const endHex=document.getElementById('gradEnd').value; const gradCss=`linear-gradient(135deg, ${startHex}, ${endHex})`; document.getElementById('previewGradBox').style.background=gradCss; const root=document.documentElement.style; root.setProperty('--accent', endHex); root.setProperty('--accent-hi', startHex); root.setProperty('--accent-dim', startHex); root.setProperty('--accent-gradient', gradCss); root.setProperty('--card-tint', hexToRgb(endHex)); document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected')); }
 </script>
 
-<!-- ===== SUPABASE + AUTH (ONCLICK LANGSUNG) ===== -->
+<!-- ===== SUPABASE + AUTH (FUNGSI GLOBAL) ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// Inisialisasi Supabase
+// ============================================================
+//  INISIALISASI SUPABASE
+// ============================================================
 const SUPABASE_URL = 'https://wkuxgnlanjrcmnfarpvj.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrdXhnbmxhbmpyY21uZmFycHZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNjE5NTYsImV4cCI6MjEwMjgzNzk1Nn0.Z0FtiNJCRgiTSbIgbN2a-iC7hbClAVDGTNW9Tc4c7tM';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 window.supabase = supabase;
 console.log('Supabase siap');
 
-// ----- LOGIN -----
+// ============================================================
+//  FUNGSI LOGIN
+// ============================================================
 function handleLogin() {
-    alert('Tombol login ditekan'); // TEST
+    alert('🔵 Tombol Login ditekan!'); // <-- PASTI MUNCUL
+
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value.trim();
-    if (!email || !password) { alert('Isi email dan password'); return; }
-    document.querySelector('#loginView .btn-activation').textContent = 'Memproses...';
+
+    if (!email || !password) {
+        alert('Harap isi email dan password');
+        return;
+    }
+
+    var btn = document.querySelector('#loginView .btn-activation');
+    btn.textContent = 'Memproses...';
+    btn.disabled = true;
+
     supabase.auth.signInWithPassword({ email: email, password: password })
         .then(function(result) {
             if (result.error) throw result.error;
             if (result.data.user) {
-                localStorage.setItem('thanzdev_user', JSON.stringify({ id: result.data.user.id, email: result.data.user.email }));
-                alert('Login berhasil!');
+                localStorage.setItem('thanzdev_user', JSON.stringify({
+                    id: result.data.user.id,
+                    email: result.data.user.email
+                }));
+                alert('✅ Login berhasil!');
                 window.location.href = '/fitur.html';
             }
         })
         .catch(function(err) {
-            alert('Login gagal: ' + err.message);
-            document.querySelector('#loginView .btn-activation').textContent = 'Masuk';
+            alert('❌ Login gagal: ' + err.message);
+            btn.textContent = 'Masuk';
+            btn.disabled = false;
         });
 }
 
-// ----- REGISTER -----
+// ============================================================
+//  FUNGSI REGISTER (PASTI ADA ALERT)
+// ============================================================
 function handleRegister() {
-    alert('Tombol register ditekan'); // TEST
+    alert('🟢 Tombol Register ditekan!'); // <-- PASTI MUNCUL
+
     var name = document.getElementById('regName').value.trim();
     var email = document.getElementById('regEmail').value.trim();
     var password = document.getElementById('regPassword').value.trim();
-    if (!name || !email || !password) { alert('Isi semua field'); return; }
-    if (password.length < 6) { alert('Password minimal 6 karakter'); return; }
-    document.querySelector('#registerView .btn-activation').textContent = 'Memproses...';
+
+    if (!name || !email || !password) {
+        alert('Harap isi semua field');
+        return;
+    }
+    if (password.length < 6) {
+        alert('Password minimal 6 karakter');
+        return;
+    }
+
+    var btn = document.querySelector('#registerView .btn-activation');
+    btn.textContent = 'Memproses...';
+    btn.disabled = true;
+
     supabase.auth.signUp({
         email: email,
         password: password,
@@ -237,7 +268,7 @@ function handleRegister() {
     .then(function(result) {
         if (result.error) throw result.error;
         if (result.data.user) {
-            alert('Pendaftaran berhasil! Silakan login.');
+            alert('✅ Pendaftaran berhasil! Silakan login.');
             switchAuthView('login');
             document.getElementById('regName').value = '';
             document.getElementById('regEmail').value = '';
@@ -245,23 +276,30 @@ function handleRegister() {
         }
     })
     .catch(function(err) {
-        alert('Register gagal: ' + err.message);
+        alert('❌ Register gagal: ' + err.message);
     })
     .finally(function() {
-        document.querySelector('#registerView .btn-activation').textContent = 'Buat Akun Baru';
+        btn.textContent = 'Buat Akun Baru';
+        btn.disabled = false;
     });
 }
 
-// ----- GITHUB -----
+// ============================================================
+//  FUNGSI GITHUB
+// ============================================================
 function handleGitHub() {
-    alert('Tombol GitHub ditekan');
+    alert('🟣 Tombol GitHub ditekan!');
     supabase.auth.signInWithOAuth({
         provider: 'github',
         options: { redirectTo: window.location.origin + '/fitur.html' }
-    }).catch(function(err) { alert('GitHub error: ' + err.message); });
+    }).catch(function(err) {
+        alert('❌ GitHub error: ' + err.message);
+    });
 }
 
-// Cek session saat load
+// ============================================================
+//  CEK SESSION SAAT LOAD
+// ============================================================
 supabase.auth.getSession().then(function(result) {
     if (result.data.session) {
         localStorage.setItem('thanzdev_user', JSON.stringify({
@@ -271,6 +309,13 @@ supabase.auth.getSession().then(function(result) {
         window.location.href = '/fitur.html';
     }
 }).catch(function(e) { console.log(e); });
+
+// PASTIKAN FUNGSI GLOBAL (untuk jaga-jaga)
+window.handleLogin = handleLogin;
+window.handleRegister = handleRegister;
+window.handleGitHub = handleGitHub;
+
+console.log('✅ Semua fungsi global sudah siap.');
 </script>
 </body>
-              </html>
+</html>
