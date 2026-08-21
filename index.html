@@ -541,6 +541,7 @@
 
 </div>
 
+<!-- ===== SCRIPT FUNGSI UI ===== -->
 <script>
   function toggleThemePanel(){
     const panel = document.getElementById('themePanel');
@@ -628,53 +629,173 @@
   }
 </script>
 
-<!-- Script Auth (module) -->
-<script type="module">
-  import { supabase } from './js/supabase-client.js';
-  import { signUp, signIn, signInWithGitHub, getCurrentUser } from './js/auth.js';
-
+<!-- ===== SCRIPT AUTH - SUDAH DIPERBAIKI ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Ambil elemen
   const loginBtn = document.getElementById('loginBtn');
   const registerBtn = document.getElementById('registerBtn');
   const githubBtn = document.getElementById('githubLoginBtn');
 
-  // Login
-  loginBtn.addEventListener('click', async () => {
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
+  // ===== CEK SESSION =====
+  // Cek apakah user sudah login (via Supabase session)
+  async function checkSession() {
     try {
-      await signIn(email, password);
-      window.location.href = '/fitur.html';
+      // Coba ambil session dari localStorage (disimpan saat login)
+      const userData = localStorage.getItem('thanzdev_user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user && user.id) {
+          // Coba verifikasi ke Supabase
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session) {
+            window.location.href = '/fitur.html';
+            return;
+          } else {
+            // Session tidak valid, hapus localStorage
+            localStorage.removeItem('thanzdev_user');
+          }
+        }
+      }
+    } catch(e) {
+      console.log('Cek session error:', e);
+    }
+  }
+  checkSession();
+
+  // ===== LOGIN =====
+  loginBtn.addEventListener('click', async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    if (!email || !password) {
+      alert('Harap isi email dan password!');
+      return;
+    }
+
+    loginBtn.textContent = 'Memproses...';
+    loginBtn.disabled = true;
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+      if (error) throw error;
+
+      // Simpan session di localStorage
+      if (data.user) {
+        localStorage.setItem('thanzdev_user', JSON.stringify({
+          id: data.user.id,
+          email: data.user.email,
+          display_name: data.user.user_metadata?.display_name || email.split('@')[0]
+        }));
+        alert('Login berhasil!');
+        window.location.href = '/fitur.html';
+      }
     } catch (err) {
       alert('Login gagal: ' + err.message);
+      loginBtn.textContent = 'Masuk';
+      loginBtn.disabled = false;
     }
   });
 
-  // Register
-  registerBtn.addEventListener('click', async () => {
-    const name = document.getElementById('regName').value;
-    const email = document.getElementById('regEmail').value;
-    const password = document.getElementById('regPassword').value;
+  // ===== REGISTER =====
+  registerBtn.addEventListener('click', async function() {
+    const name = document.getElementById('regName').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+
+    if (!name || !email || !password) {
+      alert('Harap isi semua field!');
+      return;
+    }
+    if (password.length < 6) {
+      alert('Password minimal 6 karakter.');
+      return;
+    }
+
+    registerBtn.textContent = 'Memproses...';
+    registerBtn.disabled = true;
+
     try {
-      await signUp(email, password, name);
-      alert('Pendaftaran berhasil! Silakan login.');
-      switchAuthView('login');
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: { display_name: name }
+        }
+      });
+
+      if (error) throw error;
+
+      if (data.user) {
+        // Insert ke tabel users dilakukan otomatis oleh trigger/function di Supabase
+        // Tapi kita panggil sync manual jika perlu (sudah ada di auth.js)
+        // Karena kita tidak pakai module, kita langsung fetch ke API sync user (opsional)
+        // Atau kita biarkan trigger di Supabase yang insert.
+        alert('Pendaftaran berhasil! Silakan login.');
+        switchAuthView('login');
+        // Kosongkan form register
+        document.getElementById('regName').value = '';
+        document.getElementById('regEmail').value = '';
+        document.getElementById('regPassword').value = '';
+      }
     } catch (err) {
       alert('Register gagal: ' + err.message);
+    } finally {
+      registerBtn.textContent = 'Buat Akun Baru';
+      registerBtn.disabled = false;
     }
   });
 
-  // GitHub OAuth
-  githubBtn.addEventListener('click', async () => {
+  // ===== GITHUB LOGIN =====
+  githubBtn.addEventListener('click', async function() {
     try {
-      await signInWithGitHub();
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'github',
+        options: {
+          redirectTo: window.location.origin + '/fitur.html'
+        }
+      });
+      if (error) throw error;
+      // Redirect akan dilakukan oleh Supabase
     } catch (err) {
       alert('GitHub login gagal: ' + err.message);
     }
   });
 
-  // Cek session, jika sudah login redirect ke fitur
-  const user = await getCurrentUser();
-  if (user) window.location.href = '/fitur.html';
+  // ===== SUPPORT ENTER KEY =====
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') loginBtn.click();
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('loginPassword').focus();
+  });
+  document.getElementById('regPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') registerBtn.click();
+  });
+  document.getElementById('regEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('regPassword').focus();
+  });
+  document.getElementById('regName').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') document.getElementById('regEmail').focus();
+  });
+
+});
 </script>
+
+<!-- Include Supabase Client (harus di-load sebelum script auth) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // Inisialisasi Supabase
+  const SUPABASE_URL = '{{SUPABASE_URL}}';  // Ganti dengan URL Supabase Anda
+  const SUPABASE_ANON_KEY = '{{SUPABASE_ANON_KEY}}'; // Ganti dengan anon key Anda
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // Simpan ke global agar bisa diakses
+  window.supabase = supabase;
+</script>
+
 </body>
-  </html>
+</html>
