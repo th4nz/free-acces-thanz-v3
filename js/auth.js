@@ -11,7 +11,6 @@ export async function signUp(email, password, displayName) {
     }
   });
   if (error) throw error;
-  // Sinkronisasi ke tabel users dilakukan oleh trigger/function di Supabase, atau kita upsert manual
   await syncUserAfterAuth(data.user);
   return data;
 }
@@ -23,14 +22,11 @@ export async function signIn(email, password) {
   return data;
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGitHub() {
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
+    provider: 'github',
     options: {
-      redirectTo: window.location.origin + '/fitur.html',
-      queryParams: {
-        prompt: 'select_account'
-      }
+      redirectTo: window.location.origin + '/fitur.html'
     }
   });
   if (error) throw error;
