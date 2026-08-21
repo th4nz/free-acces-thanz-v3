@@ -90,6 +90,10 @@
         footer p a{color:var(--accent-hi);text-decoration:none;font-weight:700;cursor:pointer;}
         footer p a:hover{text-decoration:underline;}
         @media (max-width:380px){.theme-trigger{top:12px;right:12px;padding:6px 10px;font-size:11px;}.theme-panel{top:58px;right:12px;width:calc(100vw - 24px);}}
+        /* Tambahan style untuk result token */
+        .token-result{margin-top:12px;padding:12px;border-radius:12px;background:rgba(51,209,122,0.1);border:1px solid rgba(51,209,122,0.3);display:none;}
+        .token-result.show{display:block;}
+        .token-result .token{font-family:'JetBrains Mono',monospace;font-size:18px;color:#33d17a;font-weight:700;letter-spacing:1px;}
     </style>
 </head>
 <body>
@@ -133,10 +137,10 @@
         <header>
             <div class="eyebrow">Akses Aman</div>
             <h1>Masuk ke <span>ThanzDev</span></h1>
-            <p class="sub">Kelola lisensi, aktivasi, dan proyekmu dari satu dashboard.</p>
+            <p class="sub">Masuk menggunakan email dan password yang sudah terdaftar.</p>
         </header>
         <div class="glass">
-            <div class="form-group"><label for="loginEmail">Email</label><input id="loginEmail" type="email" class="input-clay" placeholder="nama@perusahaan.com" /></div>
+            <div class="form-group"><label for="loginEmail">Email</label><input id="loginEmail" type="email" class="input-clay" placeholder="username@thanzdev.temp" /></div>
             <div class="form-group">
                 <label for="loginPassword">Kata Sandi</label>
                 <div class="pass-row">
@@ -156,11 +160,10 @@
         <header>
             <div class="eyebrow">Bergabung Bersama Kami</div>
             <h1>Buat Akun <span>ThanzDev</span></h1>
-            <p class="sub">Mulai kelola lisensi dan proyek eksklusifmu sekarang.</p>
+            <p class="sub">Cukup isi username dan password, nanti kamu akan mendapatkan token unik.</p>
         </header>
         <div class="glass">
-            <div class="form-group"><label for="regName">Nama Lengkap</label><input id="regName" type="text" class="input-clay" placeholder="Nama Anda" /></div>
-            <div class="form-group"><label for="regEmail">Email</label><input id="regEmail" type="email" class="input-clay" placeholder="nama@perusahaan.com" /></div>
+            <div class="form-group"><label for="regUsername">Username</label><input id="regUsername" type="text" class="input-clay" placeholder="Masukkan username" /></div>
             <div class="form-group">
                 <label for="regPassword">Kata Sandi</label>
                 <div class="pass-row">
@@ -168,8 +171,11 @@
                     <span class="eye-toggle" onclick="togglePass('regPassword', 'eyeIconReg')"><svg id="eyeIconReg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg></span>
                 </div>
             </div>
-            <div class="form-group" style="margin-top:6px;"><label class="remember" style="font-size:12px;"><input type="checkbox" /> Saya menyetujui <a href="#" style="color:var(--accent-hi);margin-left:4px;">Syarat & Ketentuan</a></label></div>
-            <button class="btn-activation" onclick="handleRegister()" style="margin-top:10px;">Buat Akun Baru</button>
+            <div class="form-group" style="margin-top:6px;">
+                <label class="remember" style="font-size:12px;"><input type="checkbox" /> Saya menyetujui <a href="#" style="color:var(--accent-hi);margin-left:4px;">Syarat & Ketentuan</a></label>
+            </div>
+            <button class="btn-activation" onclick="handleRegister()" style="margin-top:10px;">Buat Akun</button>
+            <div id="registerResult" class="token-result"></div>
         </div>
         <footer><div class="line"></div><p>Sudah punya akun? <a onclick="switchAuthView('login')">Masuk di sini</a></p></footer>
     </div>
@@ -188,7 +194,7 @@ function setAccent(base, hi, dim, el){ const root=document.documentElement.style
 function updateCustomGradient(){ const startHex=document.getElementById('gradStart').value; const endHex=document.getElementById('gradEnd').value; const gradCss=`linear-gradient(135deg, ${startHex}, ${endHex})`; document.getElementById('previewGradBox').style.background=gradCss; const root=document.documentElement.style; root.setProperty('--accent', endHex); root.setProperty('--accent-hi', startHex); root.setProperty('--accent-dim', startHex); root.setProperty('--accent-gradient', gradCss); root.setProperty('--card-tint', hexToRgb(endHex)); document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected')); }
 </script>
 
-<!-- ===== SUPABASE + AUTH (FUNGSI GLOBAL) ===== -->
+<!-- ===== SUPABASE + AUTH ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
@@ -204,28 +210,17 @@ console.log('Supabase siap');
 //  FUNGSI LOGIN
 // ============================================================
 function handleLogin() {
-    alert('🔵 Tombol Login ditekan!'); // <-- PASTI MUNCUL
-
     var email = document.getElementById('loginEmail').value.trim();
     var password = document.getElementById('loginPassword').value.trim();
-
-    if (!email || !password) {
-        alert('Harap isi email dan password');
-        return;
-    }
-
+    if (!email || !password) { alert('Isi email dan password'); return; }
     var btn = document.querySelector('#loginView .btn-activation');
     btn.textContent = 'Memproses...';
     btn.disabled = true;
-
-    supabase.auth.signInWithPassword({ email: email, password: password })
+    supabase.auth.signInWithPassword({ email, password })
         .then(function(result) {
             if (result.error) throw result.error;
             if (result.data.user) {
-                localStorage.setItem('thanzdev_user', JSON.stringify({
-                    id: result.data.user.id,
-                    email: result.data.user.email
-                }));
+                localStorage.setItem('thanzdev_user', JSON.stringify({ id: result.data.user.id, email: result.data.user.email }));
                 alert('✅ Login berhasil!');
                 window.location.href = '/fitur.html';
             }
@@ -238,21 +233,27 @@ function handleLogin() {
 }
 
 // ============================================================
-//  FUNGSI REGISTER (PASTI ADA ALERT)
+//  FUNGSI REGISTER (Username + Password -> Token THANZ)
 // ============================================================
 function handleRegister() {
-    alert('🟢 Tombol Register ditekan!'); // <-- PASTI MUNCUL
-
-    var name = document.getElementById('regName').value.trim();
-    var email = document.getElementById('regEmail').value.trim();
+    var username = document.getElementById('regUsername').value.trim();
     var password = document.getElementById('regPassword').value.trim();
+    var resultDiv = document.getElementById('registerResult');
 
-    if (!name || !email || !password) {
-        alert('Harap isi semua field');
+    // Reset tampilan result
+    resultDiv.classList.remove('show');
+    resultDiv.innerHTML = '';
+
+    if (!username || !password) {
+        alert('Harap isi username dan password');
         return;
     }
     if (password.length < 6) {
         alert('Password minimal 6 karakter');
+        return;
+    }
+    if (username.length < 3) {
+        alert('Username minimal 3 karakter');
         return;
     }
 
@@ -260,26 +261,55 @@ function handleRegister() {
     btn.textContent = 'Memproses...';
     btn.disabled = true;
 
+    // Buat email dari username
+    var email = username + '@thanzdev.temp';
+
+    // Step 1: Buat user di Supabase Auth
     supabase.auth.signUp({
         email: email,
         password: password,
-        options: { data: { display_name: name } }
+        options: { data: { display_name: username } }
     })
     .then(function(result) {
         if (result.error) throw result.error;
         if (result.data.user) {
-            alert('✅ Pendaftaran berhasil! Silakan login.');
-            switchAuthView('login');
-            document.getElementById('regName').value = '';
-            document.getElementById('regEmail').value = '';
-            document.getElementById('regPassword').value = '';
+            var userId = result.data.user.id;
+            // Step 2: Generate token THANZ-XXXXX
+            var token = 'THANZ-' + Math.random().toString(36).substring(2, 7).toUpperCase();
+            // Step 3: Update tabel users dengan token (kolom username)
+            // Gunakan supabase client (dengan anon key, asalkan RLS mengizinkan update sendiri)
+            // Atau bisa pakai service role jika perlu, tapi karena user baru kita pakai auth uid
+            return supabase
+                .from('users')
+                .update({ username: token })
+                .eq('auth_id', userId)
+                .then(function(updateResult) {
+                    if (updateResult.error) throw updateResult.error;
+                    // Tampilkan token ke user
+                    resultDiv.innerHTML = `
+                        <div style="font-weight:600;margin-bottom:4px;">✅ Pendaftaran berhasil!</div>
+                        <div style="font-size:13px;color:var(--text-lo);">Token unik kamu:</div>
+                        <div class="token">${token}</div>
+                        <div style="font-size:12px;color:var(--text-lo);margin-top:8px;">Gunakan token ini untuk login atau keperluan lainnya.</div>
+                    `;
+                    resultDiv.classList.add('show');
+                    // Kosongkan form
+                    document.getElementById('regUsername').value = '';
+                    document.getElementById('regPassword').value = '';
+                    btn.textContent = 'Buat Akun';
+                    btn.disabled = false;
+                    // Alert sukses
+                    alert('✅ Pendaftaran berhasil! Token kamu: ' + token);
+                    // Bisa juga langsung arahkan ke login
+                    switchAuthView('login');
+                    // Isi email di form login
+                    document.getElementById('loginEmail').value = email;
+                });
         }
     })
     .catch(function(err) {
         alert('❌ Register gagal: ' + err.message);
-    })
-    .finally(function() {
-        btn.textContent = 'Buat Akun Baru';
+        btn.textContent = 'Buat Akun';
         btn.disabled = false;
     });
 }
@@ -288,17 +318,14 @@ function handleRegister() {
 //  FUNGSI GITHUB
 // ============================================================
 function handleGitHub() {
-    alert('🟣 Tombol GitHub ditekan!');
     supabase.auth.signInWithOAuth({
         provider: 'github',
         options: { redirectTo: window.location.origin + '/fitur.html' }
-    }).catch(function(err) {
-        alert('❌ GitHub error: ' + err.message);
-    });
+    }).catch(function(err) { alert('❌ GitHub error: ' + err.message); });
 }
 
 // ============================================================
-//  CEK SESSION SAAT LOAD
+//  CEK SESSION
 // ============================================================
 supabase.auth.getSession().then(function(result) {
     if (result.data.session) {
@@ -310,12 +337,11 @@ supabase.auth.getSession().then(function(result) {
     }
 }).catch(function(e) { console.log(e); });
 
-// PASTIKAN FUNGSI GLOBAL (untuk jaga-jaga)
+// Pastikan fungsi global
 window.handleLogin = handleLogin;
 window.handleRegister = handleRegister;
 window.handleGitHub = handleGitHub;
-
-console.log('✅ Semua fungsi global sudah siap.');
+console.log('✅ Semua fungsi siap.');
 </script>
 </body>
 </html>
