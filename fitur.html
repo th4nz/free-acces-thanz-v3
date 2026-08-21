@@ -1,3 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThanzDev — Generate AM Premium</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --void:#0c111e;
+    --deep:#131c31;
+    --accent:#2fb8ff;
+    --accent-hi:#8fe0ff;
+    --accent-dim:#0d7ab8;
+    --accent-gradient:linear-gradient(135deg, #8fe0ff, #2fb8ff);
+    --text-hi:#f2f7fb;
+    --text-lo:#8fa1b8;
+    --hairline:rgba(140,200,255,0.14);
+    --card-tint:120,190,255;
+    --glass-noise-op:0.025;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    min-height:100vh;
+    background:var(--void);
+    font-family:'Manrope',system-ui,sans-serif;
+    color:var(--text-hi);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .field{position:fixed;inset:0;z-index:0;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.35;mix-blend-mode:screen;}
+
+  .blob.a{
+    width:65vw;height:65vw;max-width:550px;max-height:550px;
+    top:-15%;left:-15%;
+    background:radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    animation:drift1 26s ease-in-out infinite;
+  }
+  .blob.b{
+    width:55vw;height:55vw;max-width:480px;max-height:480px;
+    bottom:-10%;right:-15%;
+    background:radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    animation:drift2 32s ease-in-out infinite;
+  }
+  .blob.c{
+    width:38vw;height:38vw;max-width:320px;max-height:320px;
+    top:38%;left:55%;
+    background:radial-gradient(circle, var(--accent-hi) 0%, transparent 70%);
+    opacity:0.2;
+    animation:drift3 22s ease-in-out infinite;
+  }
+
+  @keyframes drift1{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(6%,8%) scale(1.08);}
+  }
+  @keyframes drift2{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-5%,-6%) scale(1.05);}
+  }
+  @keyframes drift3{
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(-10%,10%);}
+  }
+
+  .noise{
+    position:fixed;inset:0;z-index:1;pointer-events:none;opacity:var(--glass-noise-op);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{
+    position:relative;z-index:2;
+    width:100%;max-width:460px;
+    min-height:100vh;margin:0 auto;
+    padding:30px 20px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+
+  header{margin-bottom:30px;}
+
+  .eyebrow{
+    display:flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:2.5px;
+    color:var(--accent);text-transform:uppercase;
+    margin-bottom:14px;
+  }
+  .eyebrow::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px 2px var(--accent);
+  }
+
+  h1{
+    font-size:30px;font-weight:800;letter-spacing:-1.1px;line-height:1.08;
+    color:#fff;
+  }
+  h1 span{
+    background:var(--accent-gradient);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header p.sub{margin-top:10px;font-size:13.5px;color:var(--text-lo);line-height:1.6;max-width:34ch;}
+
+  .glass{
+    position:relative;
+    background:linear-gradient(155deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 45%, rgba(var(--card-tint),0.02));
+    border-radius:26px;
+    backdrop-filter:blur(24px) saturate(140%);
+    -webkit-backdrop-filter:blur(24px) saturate(140%);
+    box-shadow:
+      0 1px 0 rgba(255,255,255,0.18) inset,
+      0 -1px 0 rgba(0,0,0,0.4) inset,
+      0 24px 60px -20px rgba(0,0,0,0.75),
+      0 0 0 1px rgba(255,255,255,0.06);
+    padding:26px 24px;
+    margin-bottom:20px;
+  }
+  .glass::before{
+    content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;
+    background:conic-gradient(from 220deg at 30% 20%, rgba(255,255,255,0.55), rgba(255,255,255,0.02) 25%, rgba(var(--card-tint),0.35) 50%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.4));
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask-composite:exclude;
+    pointer-events:none;opacity:0.9;
+  }
+  .glass::after{
+    content:"";position:absolute;top:-20%;left:-10%;width:60%;height:55%;
+    background:radial-gradient(ellipse, rgba(255,255,255,0.16), transparent 70%);
+    border-radius:50%;pointer-events:none;filter:blur(2px);
+  }
+
+  .form-group{margin-bottom:18px;position:relative;z-index:2;}
+  .form-group label{
+    display:block;font-family:'JetBrains Mono',monospace;font-size:11px;
+    letter-spacing:1px;color:var(--accent-hi);
+    margin-bottom:8px;text-transform:uppercase;
+  }
+
+  .input-clay{
+    width:100%;padding:14px 18px;font-size:14px;
+    background:rgba(2, 3, 8, 0.4);
+    border:1px solid var(--hairline);
+    border-radius:14px;color:var(--text-hi);
+    outline:none;font-family:'Manrope',inherit;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .input-clay:focus{border-color:var(--accent); background:rgba(2, 3, 8, 0.6);}
+  .input-clay::placeholder{color:var(--text-lo);opacity:0.6;}
+
+  .email-row{display:flex;gap:10px;align-items:center;}
+  .email-row .input-clay{flex:1;}
+
+  .btn-clay{
+    font-family:'Manrope',inherit;cursor:pointer;border:none;
+    font-size:13px;font-weight:700;padding:14px 20px;border-radius:14px;
+    background:rgba(var(--card-tint), 0.15);color:var(--accent-hi);
+    border:1px solid rgba(var(--card-tint), 0.3);
+    transition:all 0.2s ease;white-space:nowrap;
+  }
+  .btn-clay:hover:not(:disabled){
+    background:rgba(var(--card-tint), 0.25);
+    box-shadow:0 0 15px rgba(var(--card-tint), 0.3);
+  }
+  .btn-clay:disabled{opacity:0.8;cursor:default;}
+
+  .btn-activation{
+    width:100%;font-family:'Manrope',inherit;cursor:pointer;border:none;
+    font-size:15px;font-weight:700;padding:16px 22px;border-radius:16px;
+    color:#00131f;
+    background:var(--accent-gradient);
+    box-shadow:0 8px 24px -6px rgba(var(--card-tint),0.55), inset 0 1px 0 rgba(255,255,255,0.6);
+    transition:all 0.2s cubic-bezier(.2,.8,.3,1);
+    position:relative;overflow:hidden;margin-top:4px;
+    display:flex;align-items:center;justify-content:center;
+    min-height:52px;z-index:2;
+  }
+  .btn-activation:hover:not(:disabled){
+    box-shadow:0 10px 30px -6px rgba(var(--card-tint),0.75), inset 0 1px 0 rgba(255,255,255,0.7);
+    transform:translateY(-1px);
+  }
+  .btn-activation:active:not(:disabled){transform:scale(0.97);}
+  .btn-activation:disabled{cursor:default;opacity:0.9;}
+
+  .loader-container{
+    display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:100%;
+  }
+  .loader-dot{
+    width:10px;height:10px;border-radius:50%;background:#00131f;
+    animation:bounceDot 1.4s ease-in-out infinite both;
+  }
+  .loader-dot.d2{animation-delay:-0.16s;}
+  .loader-dot.d3{animation-delay:-0.32s;}
+
+  @keyframes bounceDot{
+    0%, 80%, 100%{transform:scale(0);}
+    40%{transform:scale(1.0);}
+  }
+
+  .success-content{display:flex;align-items:center;justify-content:center;gap:10px;}
+  .success-content svg{
+    width:20px;height:20px;stroke:#00131f;fill:none;stroke-width:3;
+  }
+
+  .info-msg, .error-msg{
+    padding:10px 16px;border-radius:12px;font-size:13px;
+    margin-bottom:16px;display:none;text-align:center;position:relative;z-index:2;
+  }
+  .info-msg{
+    background:rgba(47, 184, 255, 0.1);border:1px solid rgba(47, 184, 255, 0.3);
+    color:var(--accent-hi);
+  }
+  .error-msg{
+    background:rgba(255, 60, 60, 0.1);border:1px solid rgba(255, 60, 60, 0.3);
+    color:#ff9e9e;
+  }
+  .info-msg.show, .error-msg.show{display:block;animation:fadeIn 0.3s ease;}
+
+  @keyframes fadeIn{
+    from{opacity:0;transform:translateY(-4px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  footer{text-align:center;margin-top:24px;}
+  footer .line{width:36px;height:1px;background:var(--hairline);margin:0 auto 14px;}
+  footer p{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;
+    color:var(--text-lo);text-transform:uppercase;
+  }
+  footer b{color:var(--accent-hi);}
+
+  .hidden{display:none !important;}
+</style>
+</head>
+
+<body>
+
+<div class="field">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+</div>
+
+<div class="noise"></div>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">ThanzDev System</div>
+    <h1>
+      Generate Acc<br>
+      <span>AM Premium</span>
+    </h1>
+    <p class="sub">
+      Sistem aktivasi akun Alight Motion premium otomatis dengan antarmuka liquid glass berkecepatan tinggi.
+    </p>
+    <!-- Credit badge akan ditambahkan oleh script -->
+    <div id="creditBadge" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent-hi); margin-top: 8px;"></div>
+  </header>
+
+  <div class="glass">
+    <!-- Email -->
+    <div class="form-group">
+        <label for="emailInput">Email Akun</label>
+        <div class="email-row">
+            <input type="email" id="emailInput" class="input-clay" placeholder="Masukkan email..." autocomplete="email" />
+            <button id="sendBtn" class="btn-clay">Send</button>
+        </div>
+    </div>
+
+    <!-- Magic Link -->
+    <div class="form-group" style="margin-bottom: 0;">
+        <label for="magicInput">Magic Link</label>
+        <input type="url" id="magicInput" class="input-clay" placeholder="Tempel magic link disini..." autocomplete="off" />
+    </div>
+  </div>
+
+  <!-- Notifikasi & Error message -->
+  <div id="infoMsg" class="info-msg" role="status"></div>
+  <div id="errorMsg" class="error-msg" role="alert"></div>
+
+  <!-- Activation Button -->
+  <button id="activateBtn" class="btn-activation" aria-label="Aktivasi">
+      <span id="btnDefault">Aktivasi Sekarang</span>
+      <div id="loaderContainer" class="loader-container hidden">
+          <span class="loader-dot d1"></span>
+          <span class="loader-dot d2"></span>
+          <span class="loader-dot d3"></span>
+      </div>
+      <span id="btnSuccess" class="hidden success-content">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" /></svg>
+          <span>Berhasil Diaktivasi</span>
+      </span>
+  </button>
+
+  <footer>
+    <div class="line"></div>
+    <p>
+      ThanzDev · <b>Liquid System</b>
+    </p>
+  </footer>
+
+</div>
+
+<!-- Script integrasi -->
 <script type="module">
   import { supabase } from './js/supabase-client.js';
   import { getCurrentUser, signOut } from './js/auth.js';
@@ -5,59 +314,189 @@
 
   // Proteksi halaman
   const user = await getCurrentUser();
-  if (!user) window.location.href = '/';
+  if (!user) {
+    window.location.href = '/';
+  }
 
-  // Ambil credit saat load
+  // Tampilkan credit
   let currentCredit = await getCredit(user.id);
-  // Tampilkan credit di UI (misal di header atau tempat lain)
-  // Karena UI asli tidak ada indikator credit, kita bisa tambahkan secara halus
-  // Misal tambahkan badge di header atau di footer
-  const header = document.querySelector('header');
-  const creditBadge = document.createElement('div');
-  creditBadge.style.cssText = 'font-family: JetBrains Mono; font-size: 12px; color: var(--accent-hi); margin-top: 8px;';
-  creditBadge.textContent = `💎 Credit: ${currentCredit}`;
-  header.appendChild(creditBadge);
+  document.getElementById('creditBadge').textContent = `💎 Credit: ${currentCredit}`;
 
-  // Override handleActivation di script asli
-  const originalActivate = window.handleActivation;
-  window.handleActivation = async function() {
-    // Cek credit
-    currentCredit = await getCredit(user.id);
-    if (currentCredit <= 0) {
-      alert('Credit habis. Tunggu reset 3 jam berikutnya.');
-      return;
-    }
-    // Panggil proxy API
-    const email = document.getElementById('emailInput').value;
-    const magic = document.getElementById('magicInput').value;
-    try {
-      const res = await fetch(`/api/fitur?action=verif&email=${encodeURIComponent(email)}&url=${encodeURIComponent(magic)}`);
-      const data = await res.json();
-      if (data.status) {
-        // Sukses → kurangi credit
-        await useCredit(user.id);
-        currentCredit = await getCredit(user.id);
-        creditBadge.textContent = `💎 Credit: ${currentCredit}`;
-        // Lanjutkan UI sukses (tampilkan success)
-        document.getElementById('btnDefault').classList.add('hidden');
-        document.getElementById('loaderContainer').classList.add('hidden');
-        document.getElementById('btnSuccess').classList.remove('hidden');
-      } else {
-        alert('Gagal aktivasi: ' + (data.error || data.message));
+  // Elemen
+  const emailInput = document.getElementById('emailInput');
+  const magicInput = document.getElementById('magicInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const activateBtn = document.getElementById('activateBtn');
+  const btnDefault = document.getElementById('btnDefault');
+  const loaderContainer = document.getElementById('loaderContainer');
+  const btnSuccess = document.getElementById('btnSuccess');
+  const errorMsg = document.getElementById('errorMsg');
+  const infoMsg = document.getElementById('infoMsg');
+
+  let isLoading = false;
+  let isSuccess = false;
+  let cachedEmail = '';
+
+  function showError(text) {
+      infoMsg.classList.remove('show');
+      errorMsg.textContent = text;
+      errorMsg.classList.add('show');
+  }
+
+  function showInfo(text) {
+      errorMsg.classList.remove('show');
+      infoMsg.textContent = text;
+      infoMsg.classList.add('show');
+  }
+
+  function hideMessages() {
+      errorMsg.classList.remove('show');
+      infoMsg.classList.remove('show');
+  }
+
+  // Kirim magic link via proxy
+  async function callSend(email) {
+      const res = await fetch(`/api/fitur?action=send&email=${encodeURIComponent(email)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+  }
+
+  // Verifikasi magic link via proxy
+  async function callVerif(email, magicLink) {
+      const res = await fetch(`/api/fitur?action=verif&email=${encodeURIComponent(email)}&url=${encodeURIComponent(magicLink)}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return res.json();
+  }
+
+  async function handleSend() {
+      const email = emailInput.value.trim();
+      hideMessages();
+
+      if (!email) {
+          showError('Masukkan email untuk dikirim.');
+          return;
       }
-    } catch (err) {
-      alert('Error: ' + err.message);
-    }
-  };
+      if (!email.includes('@') || !email.includes('.')) {
+          showError('Masukkan email yang valid.');
+          return;
+      }
 
-  // Logout (tambahkan tombol logout di header jika diperlukan)
-  // Untuk menjaga UI, kita bisa tambahkan di pojok kanan atas
+      sendBtn.textContent = 'Mengirim...';
+      sendBtn.disabled = true;
+
+      try {
+          const data = await callSend(email);
+          if (data.status) {
+              cachedEmail = email;
+              sendBtn.textContent = 'Terkirim';
+              showInfo('Magic link telah dikirim, cek folder spam jika tidak ada di kotak masuk.');
+              magicInput.focus();
+          } else {
+              showError(`Gagal kirim: ${data.error || data.message || 'Unknown error'}`);
+              sendBtn.textContent = 'Send';
+              sendBtn.disabled = false;
+          }
+      } catch (err) {
+          showError(`Error: ${err.message}`);
+          sendBtn.textContent = 'Send';
+          sendBtn.disabled = false;
+      }
+  }
+
+  async function handleActivation() {
+      if (isLoading || isSuccess) return;
+
+      const email = emailInput.value.trim();
+      const magic = magicInput.value.trim();
+
+      hideMessages();
+
+      if (!email) {
+          showError('Email wajib diisi.');
+          return;
+      }
+      if (!email.includes('@') || !email.includes('.')) {
+          showError('Masukkan email yang valid.');
+          return;
+      }
+      if (!magic) {
+          showError('Magic Link wajib diisi.');
+          return;
+      }
+      if (!magic.startsWith('http://') && !magic.startsWith('https://')) {
+          showError('Magic Link harus berupa URL (http/https).');
+          return;
+      }
+
+      // Cek credit
+      currentCredit = await getCredit(user.id);
+      if (currentCredit <= 0) {
+          showError('Credit habis. Tunggu reset 3 jam berikutnya.');
+          return;
+      }
+
+      const emailToUse = cachedEmail || email;
+
+      isLoading = true;
+      activateBtn.disabled = true;
+      btnDefault.classList.add('hidden');
+      loaderContainer.classList.remove('hidden');
+
+      try {
+          const data = await callVerif(emailToUse, magic);
+          if (data.status) {
+              // Sukses → kurangi credit
+              await useCredit(user.id);
+              currentCredit = await getCredit(user.id);
+              document.getElementById('creditBadge').textContent = `💎 Credit: ${currentCredit}`;
+              
+              isLoading = false;
+              isSuccess = true;
+              loaderContainer.classList.add('hidden');
+              btnSuccess.classList.remove('hidden');
+              cachedEmail = '';
+          } else {
+              isLoading = false;
+              activateBtn.disabled = false;
+              loaderContainer.classList.add('hidden');
+              btnDefault.classList.remove('hidden');
+              showError(`Gagal: ${data.error || data.message || 'Unknown error'}`);
+          }
+      } catch (err) {
+          isLoading = false;
+          activateBtn.disabled = false;
+          loaderContainer.classList.add('hidden');
+          btnDefault.classList.remove('hidden');
+          showError(`Error: ${err.message}`);
+      }
+  }
+
+  sendBtn.addEventListener('click', handleSend);
+  activateBtn.addEventListener('click', handleActivation);
+
+  magicInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+          e.preventDefault();
+          handleActivation();
+      }
+  });
+
+  emailInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+          e.preventDefault();
+          magicInput.focus();
+      }
+  });
+
+  emailInput.addEventListener('input', hideMessages);
+  magicInput.addEventListener('input', hideMessages);
+
+  // Tombol logout (tambahan kecil tanpa merusak UI)
   const logoutBtn = document.createElement('button');
   logoutBtn.textContent = 'Logout';
   logoutBtn.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 999; background: rgba(255,60,60,0.15); border: 1px solid rgba(255,60,60,0.3); color: #ff9e9e; padding: 8px 16px; border-radius: 12px; font-family: Manrope; font-weight: 600; cursor: pointer;';
-  logoutBtn.onclick = () => signOut();
+  logoutBtn.onclick = signOut;
   document.body.appendChild(logoutBtn);
-
-  // Hapus event listener lama agar tidak konflik
-  // Karena script asli menggunakan fungsi anonim, kita override dengan yang baru
 </script>
+</body>
+</html>
