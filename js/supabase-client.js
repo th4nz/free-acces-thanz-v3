@@ -5,5 +5,5 @@ const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || window.SUPABASE_ANON_
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Simpan ke window untuk akses di HTML
+// Simpan ke window agar bisa diakses dari HTML
 window.supabase = supabase;
