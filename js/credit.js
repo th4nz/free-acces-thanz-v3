@@ -31,7 +31,7 @@ export async function incrementStats(userId, type) {
   const field = type === 'success' ? 'total_success' : 'total_failed';
   const { error } = await supabase
     .from('users')
-    .update({ [field]: supabase.rpc('increment', { row_id: userId, column: field }) })
+    .update({ [field]: supabase.raw(`?? + 1`, [field]) })
     .eq('auth_id', userId);
   if (error) throw error;
-}
+}}
