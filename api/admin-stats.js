@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import jwt from 'jsonwebtoken';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -6,26 +7,25 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
-  // Verifikasi token admin dari header (sederhana)
+  // Verifikasi token admin
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   const token = authHeader.split(' ')[1];
   try {
-    const jwt = require('jsonwebtoken');
     jwt.verify(token, process.env.JWT_SECRET || 'rahasia_jwt');
   } catch {
     return res.status(401).json({ error: 'Invalid token' });
   }
 
   try {
-    // Ambil total user
+    // Total user
     const { count: totalUsers } = await supabase
       .from('users')
       .select('*', { count: 'exact', head: true });
 
-    // Ambil total sukses & gagal (dari semua user)
+    // Total sukses & gagal
     const { data: stats } = await supabase
       .from('users')
       .select('total_success, total_failed');
@@ -36,7 +36,7 @@ export default async function handler(req, res) {
       totalFailed += row.total_failed || 0;
     });
 
-    // Ambil data user terbaru (limit 10)
+    // 10 user terbaru
     const { data: recentUsers } = await supabase
       .from('users')
       .select('email, display_name, total_success, total_failed, last_login_at, credits')
@@ -52,4 +52,4 @@ export default async function handler(req, res) {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
-}
+      }
