@@ -1,0 +1,17 @@
+<script type="module">
+  import { adminLogin } from './js/auth.js';
+
+  const form = document.querySelector('.glass');
+  const loginBtn = form.querySelector('.btn-activation');
+
+  loginBtn.addEventListener('click', async () => {
+    const username = document.getElementById('adminUser').value;
+    const password = document.getElementById('adminPassword').value;
+    try {
+      await adminLogin(username, password);
+      window.location.href = '/dashboard-admin.html';
+    } catch (err) {
+      alert('Login admin gagal: ' + err.message);
+    }
+  });
+</script>
