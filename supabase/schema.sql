@@ -4,7 +4,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Tabel users
 CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  auth_id UUID UNIQUE NOT NULL,            -- ID dari Supabase Auth
+  auth_id UUID UNIQUE NOT NULL,
   email TEXT UNIQUE NOT NULL,
   username TEXT,
   display_name TEXT,
@@ -15,16 +15,14 @@ CREATE TABLE IF NOT EXISTS users (
   last_login_at TIMESTAMPTZ,
   total_success INT DEFAULT 0,
   total_failed INT DEFAULT 0,
-  role TEXT DEFAULT 'user',                -- 'user' atau 'admin'
+  role TEXT DEFAULT 'user',
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Index untuk performa
 CREATE INDEX idx_users_auth_id ON users(auth_id);
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_role ON users(role);
 
--- RLS: user hanya bisa melihat/mengupdate data sendiri, admin bisa semua
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY users_select_self ON users
@@ -33,7 +31,6 @@ CREATE POLICY users_select_self ON users
 CREATE POLICY users_update_self ON users
   FOR UPDATE USING (auth.uid() = auth_id);
 
--- Insert trigger: set default credit_reset_at
 CREATE OR REPLACE FUNCTION set_credit_defaults()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -48,7 +45,6 @@ BEFORE INSERT ON users
 FOR EACH ROW
 EXECUTE FUNCTION set_credit_defaults();
 
--- Fungsi untuk reset credit jika sudah 3 jam
 CREATE OR REPLACE FUNCTION reset_credits_if_needed(user_id UUID)
 RETURNS INT AS $$
 DECLARE
