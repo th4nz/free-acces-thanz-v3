@@ -1,0 +1,50 @@
+<script type="module">
+  import { requireAdmin, adminLogout } from './js/auth.js';
+
+  const session = requireAdmin();
+  if (!session) window.location.href = '/admin-login.html';
+
+  // Logout button
+  const logoutBtn = document.querySelector('.btn-logout');
+  logoutBtn.onclick = adminLogout;
+
+  // Ambil data statistik
+  async function loadStats() {
+    const token = JSON.parse(localStorage.getItem('thanzdev_admin')).token;
+    const res = await fetch('/api/admin-stats', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Gagal ambil data');
+    const data = await res.json();
+
+    document.getElementById('totalUsers').textContent = data.totalUsers;
+    document.getElementById('successCount').textContent = data.totalSuccess;
+    document.getElementById('failedCount').textContent = data.totalFailed;
+    document.getElementById('limitStatus').textContent = 'Aman';
+
+    // Isi tabel
+    const tbody = document.getElementById('userTableBody');
+    tbody.innerHTML = '';
+    data.recentUsers.forEach(user => {
+      const tr = document.createElement('tr');
+      const lastLogin = user.last_login_at ? new Date(user.last_login_at).toLocaleString('id') : '-';
+      const status = user.total_success > 0 ? 'Sukses' : 'Gagal';
+      const badge = status === 'Sukses' ? 'badge success' : 'badge danger';
+      tr.innerHTML = `
+        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-lo);">${lastLogin}</td>
+        <td style="font-weight:600;">${user.email}</td>
+        <td style="font-family:'JetBrains Mono',monospace;color:var(--accent-hi);">${user.display_name || '-'}</td>
+        <td><span class="${badge}">${status}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  loadStats().catch(err => alert('Error load stats: ' + err.message));
+
+  // Reset limit (hanya UI, tidak perlu backend karena limit sudah otomatis)
+  window.resetLimit = function() {
+    document.getElementById('limitStatus').textContent = '0%';
+    alert('Reset limit harian (hanya simulasi UI).');
+  };
+</script>
