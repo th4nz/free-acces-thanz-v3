@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  // Hanya menerima POST (atau GET sesuai kebutuhan)
+  // Hanya menerima GET (sesuai dengan cara panggil dari frontend)
   const { action, email, url } = req.query;
 
   const API_BASE = process.env.API_BASE_URL || 'https://restapidhan.vercel.app';
@@ -10,7 +10,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const targetUrl = `${API_BASE}/api/am?action=${action}&apikey=${API_KEY}&email=${encodeURIComponent(email)}${url ? `&url=${encodeURIComponent(url)}` : ''}`;
+    let targetUrl = `${API_BASE}/api/am?action=${action}&apikey=${API_KEY}&email=${encodeURIComponent(email)}`;
+    if (url) {
+      targetUrl += `&url=${encodeURIComponent(url)}`;
+    }
     const response = await fetch(targetUrl);
     const data = await response.json();
     res.status(response.status).json(data);
