@@ -487,22 +487,84 @@
   }
 </script>
 
-<!-- Script Admin Login -->
-<script type="module">
-  import { adminLogin } from './js/auth.js';
-
+<!-- ===== SCRIPT LOGIN ADMIN - SUDAH DIPERBAIKI ===== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
   const loginBtn = document.getElementById('adminLoginBtn');
-
-  loginBtn.addEventListener('click', async () => {
-    const username = document.getElementById('adminUser').value;
-    const password = document.getElementById('adminPassword').value;
+  
+  // Cek apakah sudah login sebelumnya
+  const existingSession = localStorage.getItem('thanzdev_admin');
+  if (existingSession) {
     try {
-      await adminLogin(username, password);
-      window.location.href = '/dashboard-admin.html';
-    } catch (err) {
-      alert('Login admin gagal: ' + err.message);
+      const session = JSON.parse(existingSession);
+      if (session.token) {
+        // Coba langsung ke dashboard
+        window.location.href = '/dashboard-admin.html';
+        return;
+      }
+    } catch(e) {}
+  }
+
+  loginBtn.addEventListener('click', async function() {
+    const username = document.getElementById('adminUser').value.trim();
+    const password = document.getElementById('adminPassword').value.trim();
+    
+    // Validasi input
+    if (!username || !password) {
+      alert('Harap isi username dan password!');
+      return;
+    }
+    
+    // Ubah tombol jadi loading
+    loginBtn.textContent = 'Memproses...';
+    loginBtn.disabled = true;
+    
+    try {
+      const response = await fetch('/api/admin-login', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify({ username, password })
+      });
+      
+      const data = await response.json();
+      console.log('Response API:', data);
+      
+      if (response.ok && data.token) {
+        // Simpan session
+        localStorage.setItem('thanzdev_admin', JSON.stringify({ 
+          token: data.token, 
+          username: data.username 
+        }));
+        alert('Login berhasil! Mengarahkan ke dashboard...');
+        window.location.href = '/dashboard-admin.html';
+      } else {
+        alert('Login gagal: ' + (data.message || 'Username atau password salah'));
+        loginBtn.textContent = 'Autentikasi Sesi Admin';
+        loginBtn.disabled = false;
+      }
+    } catch (error) {
+      console.error('Error detail:', error);
+      alert('Terjadi error: ' + error.message + '\n\nCek console (F12) untuk detail.');
+      loginBtn.textContent = 'Autentikasi Sesi Admin';
+      loginBtn.disabled = false;
     }
   });
+
+  // Support Enter key
+  document.getElementById('adminPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      loginBtn.click();
+    }
+  });
+  document.getElementById('adminUser').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      document.getElementById('adminPassword').focus();
+    }
+  });
+});
 </script>
+
 </body>
 </html>
