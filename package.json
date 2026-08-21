@@ -1,7 +1,17 @@
 {
-  "name": "am-pro-toolkit",
-  "version": "2.5.2",
+  "name": "thanzdev-project",
+  "version": "1.0.0",
+  "description": "ThanzDev — Generate AM Premium + Admin Dashboard",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev"
+  },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.0"
+    "@supabase/supabase-js": "^2.45.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2"
+  },
+  "devDependencies": {
+    "vercel": "^34.0.0"
   }
 }
