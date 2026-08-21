@@ -1,12 +1,296 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThanzDev — Dashboard Admin</title>
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --void:#0c111e;
+    --deep:#131c31;
+    --accent:#ffb020;
+    --accent-hi:#ffd98a;
+    --accent-dim:#c07800;
+    --accent-gradient:linear-gradient(135deg, #ffd98a, #ffb020);
+    --text-hi:#f2f7fb;
+    --text-lo:#8fa1b8;
+    --hairline:rgba(255,176,32,0.14);
+    --card-tint:255,176,32;
+    --glass-noise-op:0.025;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    min-height:100vh;
+    background:var(--void);
+    font-family:'Manrope',system-ui,sans-serif;
+    color:var(--text-hi);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .field{position:fixed;inset:0;z-index:0;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.35;mix-blend-mode:screen;}
+
+  .blob.a{
+    width:65vw;height:65vw;max-width:550px;max-height:550px;
+    top:-15%;left:-15%;
+    background:radial-gradient(circle, var(--accent) 0%, transparent 70%);
+    animation:drift1 26s ease-in-out infinite;
+  }
+  .blob.b{
+    width:55vw;height:55vw;max-width:480px;max-height:480px;
+    bottom:-10%;right:-15%;
+    background:radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);
+    animation:drift2 32s ease-in-out infinite;
+  }
+  .blob.c{
+    width:38vw;height:38vw;max-width:320px;max-height:320px;
+    top:38%;left:55%;
+    background:radial-gradient(circle, var(--accent-hi) 0%, transparent 70%);
+    opacity:0.2;
+    animation:drift3 22s ease-in-out infinite;
+  }
+
+  @keyframes drift1{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(6%,8%) scale(1.08);}
+  }
+  @keyframes drift2{
+    0%,100%{transform:translate(0,0) scale(1);}
+    50%{transform:translate(-5%,-6%) scale(1.05);}
+  }
+  @keyframes drift3{
+    0%,100%{transform:translate(0,0);}
+    50%{transform:translate(-10%,10%);}
+  }
+
+  .noise{
+    position:fixed;inset:0;z-index:1;pointer-events:none;opacity:var(--glass-noise-op);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .wrap{
+    position:relative;z-index:2;
+    width:100%;max-width:960px;
+    min-height:100vh;margin:0 auto;
+    padding:40px 20px;
+  }
+
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:30px;}
+
+  .eyebrow{
+    display:flex;align-items:center;gap:8px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;letter-spacing:2.5px;
+    color:var(--accent);text-transform:uppercase;
+    margin-bottom:6px;
+  }
+  .eyebrow::before{
+    content:"";width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 8px 2px var(--accent);
+  }
+
+  h1{
+    font-size:26px;font-weight:800;letter-spacing:-1px;color:#fff;
+  }
+  h1 span{
+    background:var(--accent-gradient);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+
+  .btn-logout{
+    font-family:'Manrope',inherit;cursor:pointer;border:none;
+    font-size:12px;font-weight:700;padding:10px 18px;border-radius:12px;
+    background:rgba(255, 60, 60, 0.12);color:#ff9e9e;
+    border:1px solid rgba(255, 60, 60, 0.3);
+    transition:background .2s ease;
+  }
+  .btn-logout:hover{background:rgba(255, 60, 60, 0.25);}
+
+  /* Grid Statistik */
+  .stats-grid{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;margin-bottom:24px;
+  }
+
+  .glass-card{
+    position:relative;
+    background:linear-gradient(155deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 45%, rgba(var(--card-tint),0.02));
+    border-radius:20px;
+    backdrop-filter:blur(24px) saturate(140%);
+    -webkit-backdrop-filter:blur(24px) saturate(140%);
+    box-shadow:0 1px 0 rgba(255,255,255,0.18) inset, 0 24px 60px -20px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.06);
+    padding:20px;
+  }
+
+  .stat-label{
+    font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-lo);
+    text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;
+  }
+  .stat-value{
+    font-size:28px;font-weight:800;color:var(--text-hi);
+  }
+  .stat-value.success{color:#33d17a;}
+  .stat-value.danger{color:#ff5da2;}
+
+  /* Panel Utama */
+  .glass-panel{
+    position:relative;
+    background:linear-gradient(155deg, rgba(255,255,255,0.06), rgba(255,255,255,0.015) 45%, rgba(var(--card-tint),0.02));
+    border-radius:24px;
+    backdrop-filter:blur(24px) saturate(140%);
+    -webkit-backdrop-filter:blur(24px) saturate(140%);
+    box-shadow:0 1px 0 rgba(255,255,255,0.18) inset, 0 24px 60px -20px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.06);
+    padding:24px;
+    margin-bottom:24px;
+  }
+
+  .panel-title{
+    font-size:16px;font-weight:700;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;
+  }
+
+  .btn-action{
+    font-family:'Manrope',inherit;cursor:pointer;border:none;
+    font-size:12px;font-weight:700;padding:8px 14px;border-radius:10px;
+    background:var(--accent-gradient);color:#2b1a00;
+    box-shadow:0 4px 12px rgba(255,176,32,0.3);
+    transition:transform .12s ease;
+  }
+  .btn-action:hover{transform:translateY(-1px);}
+
+  /* Tabel Data */
+  .table-container{width:100%;overflow-x:auto;}
+  table{width:100%;border-collapse:collapse;text-align:left;font-size:13.5px;}
+  th{
+    font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;
+    color:var(--text-lo);padding:12px;border-bottom:1px solid var(--hairline);letter-spacing:1px;
+  }
+  td{padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.04);}
+  tr:last-child td{border-bottom:none;}
+
+  .badge{
+    display:inline-block;padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .badge.success{background:rgba(51, 209, 122, 0.15);color:#33d17a;}
+  .badge.danger{background:rgba(255, 93, 162, 0.15);color:#ff5da2;}
+
+  footer{text-align:center;margin-top:30px;}
+  footer .line{width:36px;height:1px;background:var(--hairline);margin:0 auto 14px;}
+  footer p{
+    font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;
+    color:var(--text-lo);text-transform:uppercase;
+  }
+  footer b{color:var(--accent-hi);}
+
+  @media(max-width:768px){
+    header{flex-direction:column;align-items:flex-start;gap:12px;}
+  }
+</style>
+</head>
+
+<body>
+
+<div class="field">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+</div>
+
+<div class="noise"></div>
+
+<div class="wrap">
+
+  <header>
+    <div>
+      <div class="eyebrow">Konsol Server Utama</div>
+      <h1>Dashboard <span>Admin ThanzDev</span></h1>
+    </div>
+    <button class="btn-logout" id="logoutBtn">Keluar Sesi</button>
+  </header>
+
+  <!-- Statistik Ringkasan -->
+  <div class="stats-grid">
+    <div class="glass-card">
+      <div class="stat-label">Total User Terdaftar</div>
+      <div class="stat-value" id="totalUsers">0</div>
+    </div>
+    <div class="glass-card">
+      <div class="stat-label">Injeksi Sukses</div>
+      <div class="stat-value success" id="successCount">0</div>
+    </div>
+    <div class="glass-card">
+      <div class="stat-label">Injeksi Gagal</div>
+      <div class="stat-value danger" id="failedCount">0</div>
+    </div>
+    <div class="glass-card">
+      <div class="stat-label">Limit Harian Sistem</div>
+      <div class="stat-value" id="limitStatus">Aman</div>
+    </div>
+  </div>
+
+  <!-- Panel Monitor Limit & Kontrol -->
+  <div class="glass-panel">
+    <div class="panel-title">
+      <span>Pengaturan & Reset Limit API</span>
+      <button class="btn-action" id="resetLimitBtn">Reset Limit Sekarang</button>
+    </div>
+    <p style="font-size:13px;color:var(--text-lo);">
+      Limit harian saat ini mendekati batas maksimal. Anda dapat menekan tombol reset untuk mengosongkan kembali hitungan penggunaan harian server.
+    </p>
+  </div>
+
+  <!-- Panel Data Akun & Riwayat Login User -->
+  <div class="glass-panel">
+    <div class="panel-title">
+      <span>Daftar Akun & Aktivitas User</span>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Waktu</th>
+            <th>Email / Akun</th>
+            <th>Nama Tampilan</th>
+            <th>Status Injeksi</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+          <!-- Data akan diisi oleh script -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>
+    <div class="line"></div>
+    <p>ThanzDev Security · <b>Admin Control Center</b></p>
+  </footer>
+
+</div>
+
+<script>
+  // Fungsi reset limit hanya simulasi UI
+  document.getElementById('resetLimitBtn').addEventListener('click', function() {
+    document.getElementById('limitStatus').textContent = '0%';
+    alert('Limit harian sistem berhasil direset ulang ke 0%.');
+  });
+</script>
+
+<!-- Script Admin Dashboard -->
 <script type="module">
   import { requireAdmin, adminLogout } from './js/auth.js';
 
   const session = requireAdmin();
   if (!session) window.location.href = '/admin-login.html';
 
-  // Logout button
-  const logoutBtn = document.querySelector('.btn-logout');
-  logoutBtn.onclick = adminLogout;
+  // Logout
+  document.getElementById('logoutBtn').addEventListener('click', adminLogout);
 
   // Ambil data statistik
   async function loadStats() {
@@ -17,34 +301,34 @@
     if (!res.ok) throw new Error('Gagal ambil data');
     const data = await res.json();
 
-    document.getElementById('totalUsers').textContent = data.totalUsers;
-    document.getElementById('successCount').textContent = data.totalSuccess;
-    document.getElementById('failedCount').textContent = data.totalFailed;
+    document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+    document.getElementById('successCount').textContent = data.totalSuccess || 0;
+    document.getElementById('failedCount').textContent = data.totalFailed || 0;
     document.getElementById('limitStatus').textContent = 'Aman';
 
     // Isi tabel
     const tbody = document.getElementById('userTableBody');
     tbody.innerHTML = '';
-    data.recentUsers.forEach(user => {
-      const tr = document.createElement('tr');
-      const lastLogin = user.last_login_at ? new Date(user.last_login_at).toLocaleString('id') : '-';
-      const status = user.total_success > 0 ? 'Sukses' : 'Gagal';
-      const badge = status === 'Sukses' ? 'badge success' : 'badge danger';
-      tr.innerHTML = `
-        <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-lo);">${lastLogin}</td>
-        <td style="font-weight:600;">${user.email}</td>
-        <td style="font-family:'JetBrains Mono',monospace;color:var(--accent-hi);">${user.display_name || '-'}</td>
-        <td><span class="${badge}">${status}</span></td>
-      `;
-      tbody.appendChild(tr);
-    });
+    if (data.recentUsers && data.recentUsers.length > 0) {
+      data.recentUsers.forEach(user => {
+        const tr = document.createElement('tr');
+        const lastLogin = user.last_login_at ? new Date(user.last_login_at).toLocaleString('id') : '-';
+        const status = (user.total_success || 0) > 0 ? 'Sukses' : 'Gagal';
+        const badge = status === 'Sukses' ? 'badge success' : 'badge danger';
+        tr.innerHTML = `
+          <td style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text-lo);">${lastLogin}</td>
+          <td style="font-weight:600;">${user.email}</td>
+          <td style="font-family:'JetBrains Mono',monospace;color:var(--accent-hi);">${user.display_name || '-'}</td>
+          <td><span class="${badge}">${status}</span></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } else {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-lo);">Belum ada data user</td></tr>';
+    }
   }
 
   loadStats().catch(err => alert('Error load stats: ' + err.message));
-
-  // Reset limit (hanya UI, tidak perlu backend karena limit sudah otomatis)
-  window.resetLimit = function() {
-    document.getElementById('limitStatus').textContent = '0%';
-    alert('Reset limit harian (hanya simulasi UI).');
-  };
 </script>
+</body>
+</html>
