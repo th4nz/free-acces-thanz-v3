@@ -4,264 +4,776 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ThanzDev — Portal Pengguna</title>
+<!-- Supabase JS UMD -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
-:root{--void:#0c111e;--deep:#131c31;--accent:#2fb8ff;--accent-hi:#8fe0ff;--accent-dim:#0d7ab8;--accent-gradient:linear-gradient(135deg, #8fe0ff, #2fb8ff);--text-hi:#f2f7fb;--text-lo:#8fa1b8;--hairline:rgba(140,200,255,0.14);--card-tint:120,190,255;--glass-noise-op:0.025;}
-html[data-mode="light"]{--void:#f4f7fa;--deep:#e4ebf2;--text-hi:#0f172a;--text-lo:#64748b;--hairline:rgba(15,23,42,0.08);--card-tint:100,140,200;--glass-noise-op:0.015;}
-*{box-sizing:border-box;margin:0;padding:0;}
-html{scroll-behavior:smooth;}
-body{min-height:100vh;background:var(--void);font-family:'Manrope',system-ui,sans-serif;color:var(--text-hi);position:relative;overflow-x:hidden;transition:background .35s ease,color .35s ease;}
-.field{position:fixed;inset:0;z-index:0;overflow:hidden;}
-.blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:0.4;mix-blend-mode:screen;transition:background .35s ease;}
-html[data-mode="light"] .blob{opacity:0.22;mix-blend-mode:normal;}
-.blob.a{width:65vw;height:65vw;max-width:550px;max-height:550px;top:-15%;left:-15%;background:radial-gradient(circle, var(--accent) 0%, transparent 70%);}
-.blob.b{width:55vw;height:55vw;max-width:480px;max-height:480px;bottom:-10%;right:-15%;background:radial-gradient(circle, var(--accent-dim) 0%, transparent 70%);}
-.blob.c{width:38vw;height:38vw;max-width:320px;max-height:320px;top:38%;left:55%;background:radial-gradient(circle, var(--accent-hi) 0%, transparent 70%);opacity:0.2;}
-.noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:var(--glass-noise-op);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
-.wrap{position:relative;z-index:2;width:100%;max-width:440px;min-height:100vh;margin:0 auto;padding:30px 20px;display:flex;flex-direction:column;justify-content:center;}
-.theme-trigger{position:fixed;top:20px;right:20px;z-index:100;display:flex;align-items:center;gap:8px;background:rgba(var(--card-tint),0.15);backdrop-filter:blur(20px) saturate(140%);-webkit-backdrop-filter:blur(20px) saturate(140%);border:1px solid var(--hairline);border-radius:999px;padding:8px 14px;cursor:pointer;color:var(--text-hi);font-size:12px;font-weight:600;box-shadow:0 8px 20px rgba(0,0,0,0.12);transition:transform .2s ease,background .2s ease;}
-.theme-trigger:hover{transform:scale(1.03);background:rgba(var(--card-tint),0.25);}
-.theme-trigger svg{width:16px;height:16px;fill:currentColor;}
-.theme-panel{position:fixed;top:70px;right:20px;z-index:100;width:320px;background:rgba(18,27,46,0.92);html[data-mode="light"] & { background:rgba(255,255,255,0.94); }backdrop-filter:blur(25px) saturate(160%);-webkit-backdrop-filter:blur(25px) saturate(160%);border:1px solid var(--hairline);border-radius:24px;padding:20px;box-shadow:0 24px 50px rgba(0,0,0,0.4);display:none;opacity:0;transform:translateY(-10px);transition:opacity .25s ease,transform .25s ease;}
-.theme-panel.open{display:block;opacity:1;transform:translateY(0);}
-.panel-header{font-size:11px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-lo);margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;}
-.panel-section{margin-bottom:14px;}
-.panel-section:last-child{margin-bottom:0;}
-.mode-buttons{display:flex;gap:8px;}
-.mode-toggle{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:9px;border-radius:12px;cursor:pointer;border:1px solid var(--hairline);background:rgba(var(--card-tint),0.08);color:var(--text-lo);font-size:12px;font-weight:600;transition:all .15s ease;}
-.mode-toggle.active{background:var(--accent-gradient);color:#0c111e;border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,0.2);}
-.mode-toggle:not(.active):hover{color:var(--text-hi);background:rgba(var(--card-tint),0.15);}
-.swatch-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:center;}
-.swatch{width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid rgba(255,255,255,0.6);box-shadow:0 2px 6px rgba(0,0,0,0.2);transition:transform .15s ease,border-color .15s ease;justify-self:center;}
-.swatch:hover{transform:scale(1.12);}
-.swatch.selected{border-color:var(--text-hi);transform:scale(1.1);box-shadow:0 0 10px var(--accent);}
-.btn-custom-trigger{width:100%;padding:10px;border-radius:12px;cursor:pointer;font-family:'Manrope',inherit;font-size:12px;font-weight:600;background:rgba(var(--card-tint),0.1);color:var(--text-hi);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s ease,border-color .15s ease;}
-.btn-custom-trigger:hover{background:rgba(var(--card-tint),0.2);border-color:var(--accent);}
-.custom-builder{margin-top:10px;padding:12px;border-radius:16px;background:rgba(255,255,255,0.03);html[data-mode="light"] & { background:rgba(15,23,42,0.04); }border:1px solid var(--hairline);display:none;}
-.custom-builder.active{display:block;}
-.builder-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-size:12px;}
-.builder-row:last-child{margin-bottom:0;}
-.builder-row label{font-family:'JetBrains Mono',monospace;color:var(--text-lo);font-size:11px;}
-.color-inputs-group{display:flex;gap:8px;align-items:center;}
-.color-pick-box{width:32px;height:32px;border-radius:8px;overflow:hidden;border:1px solid var(--hairline);cursor:pointer;position:relative;}
-.color-pick-box input[type="color"]{position:absolute;inset:-6px;width:200%;height:200%;cursor:pointer;border:none;background:transparent;}
-.preview-gradient-box{width:100%;height:32px;border-radius:10px;border:1px solid var(--hairline);margin-top:8px;}
-.auth-view{display:none;opacity:0;transform:translateY(8px);transition:opacity .3s ease,transform .3s ease;}
-.auth-view.active{display:block;opacity:1;transform:translateY(0);}
-header{margin-bottom:28px;}
-.eyebrow{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2.5px;color:var(--accent);text-transform:uppercase;margin-bottom:14px;}
-.eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px 2px var(--accent);}
-h1{font-size:30px;font-weight:800;letter-spacing:-1.1px;line-height:1.08;color:var(--text-hi);}
-h1 span{background:var(--accent-gradient);-webkit-background-clip:text;background-clip:text;color:transparent;}
-header p.sub{margin-top:12px;font-size:13.5px;color:var(--text-lo);line-height:1.5;}
-.glass{position:relative;background:linear-gradient(155deg, rgba(var(--card-tint),0.14), rgba(var(--card-tint),0.04) 45%, rgba(var(--card-tint),0.02));border-radius:26px;backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);box-shadow:0 1px 0 rgba(255,255,255,0.25) inset,0 -1px 0 rgba(0,0,0,0.2) inset,0 24px 60px -20px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.08);padding:28px 24px;margin-bottom:20px;transition:background .35s ease,box-shadow .35s ease;}
-html[data-mode="light"] .glass{background:linear-gradient(155deg, rgba(255,255,255,0.88), rgba(255,255,255,0.6) 50%, rgba(240,244,248,0.75));box-shadow:0 1px 0 rgba(255,255,255,0.9) inset,0 -1px 0 rgba(15,23,42,0.04) inset,0 20px 45px -15px rgba(15,23,42,0.1),0 0 0 1px rgba(15,23,42,0.06);}
-.glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:conic-gradient(from 220deg at 30% 20%, rgba(255,255,255,0.6), rgba(255,255,255,0.02) 25%, rgba(var(--card-tint),0.4) 50%, rgba(255,255,255,0.02) 75%, rgba(255,255,255,0.45));-webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:0.9;}
-.glass::after{content:"";position:absolute;top:-20%;left:-10%;width:60%;height:55%;background:radial-gradient(ellipse, rgba(255,255,255,0.18), transparent 70%);border-radius:50%;pointer-events:none;filter:blur(2px);}
-html[data-mode="light"] .glass::after{background:radial-gradient(ellipse, rgba(255,255,255,0.6), transparent 70%);}
-.form-group{margin-bottom:18px;position:relative;z-index:2;}
-.form-group label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--accent-hi);html[data-mode="light"] & { color:var(--accent-dim); font-weight:700; }margin-bottom:8px;text-transform:uppercase;}
-.input-clay{width:100%;padding:14px 18px;font-size:14px;background:rgba(var(--card-tint),0.07);border:1px solid var(--hairline);border-radius:14px;color:var(--text-hi);outline:none;font-family:'Manrope',inherit;transition:border-color .15s ease,background .15s ease;}
-html[data-mode="light"] .input-clay{background:rgba(255,255,255,0.8);border-color:rgba(15,23,42,0.12);}
-.input-clay:focus{border-color:var(--accent);background:rgba(var(--card-tint),0.12);html[data-mode="light"] & { background:#fff; }}
-.input-clay::placeholder{color:var(--text-lo);}
-.pass-row{position:relative;}
-.pass-row .input-clay{padding-right:44px;}
-.eye-toggle{position:absolute;right:14px;top:50%;transform:translateY(-50%);width:20px;height:20px;cursor:pointer;color:var(--text-lo);display:flex;align-items:center;justify-content:center;}
-.eye-toggle:hover{color:var(--accent-hi);}
-.row-between{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;font-size:12.5px;position:relative;z-index:2;}
-.remember{display:flex;align-items:center;gap:8px;color:var(--text-lo);cursor:pointer;-webkit-user-select:none;user-select:none;}
-.remember input{appearance:none;-webkit-appearance:none;width:16px;height:16px;border-radius:5px;border:1px solid var(--hairline);background:rgba(var(--card-tint),0.07);html[data-mode="light"] .remember input {background:#fff; border-color:rgba(15,23,42,0.2);}cursor:pointer;position:relative;flex-shrink:0;}
-.remember input:checked{background:var(--accent-gradient);border-color:transparent;}
-.remember input:checked::after{content:"";position:absolute;left:5px;top:1px;width:4px;height:8px;border:solid #0c111e;border-width:0 2px 2px 0;transform:rotate(45deg);}
-.forgot{color:var(--accent-hi);text-decoration:none;font-weight:600;}
-.forgot:hover{text-decoration:underline;}
-.btn-activation{width:100%;font-family:'Manrope',inherit;cursor:pointer;border:none;font-size:15px;font-weight:700;padding:16px 22px;border-radius:16px;color:#0c111e;background:var(--accent-gradient);box-shadow:0 8px 24px -6px rgba(var(--card-tint),0.6), inset 0 1px 0 rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;min-height:52px;z-index:2;position:relative;transition:transform .12s ease,box-shadow .12s ease,background .35s ease;}
-.btn-activation:hover{transform:translateY(-1px);}
-.btn-activation:active{transform:translateY(0);}
-.divider{display:flex;align-items:center;gap:14px;margin:22px 0 18px;color:var(--text-lo);font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;}
-.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--hairline);}
-.btn-ghost{width:100%;font-family:'Manrope',inherit;cursor:pointer;font-size:14px;font-weight:600;padding:14px 20px;border-radius:14px;background:rgba(var(--card-tint),0.07);html[data-mode="light"] & { background:rgba(255,255,255,0.6); }color:var(--text-hi);border:1px solid var(--hairline);display:flex;align-items:center;justify-content:center;gap:10px;transition:background .2s ease,border-color .2s ease;}
-.btn-ghost:hover{background:rgba(var(--card-tint),0.18);border-color:var(--accent-dim);}
-footer{text-align:center;margin-top:24px;}
-footer .line{width:36px;height:1px;background:var(--hairline);margin:0 auto 14px;}
-footer p{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-lo);text-transform:uppercase;}
-footer p a{color:var(--accent-hi);text-decoration:none;font-weight:700;cursor:pointer;}
-footer p a:hover{text-decoration:underline;}
-@media (max-width:380px){.theme-trigger{top:12px;right:12px;padding:6px 10px;font-size:11px;}.theme-panel{top:58px;right:12px;width:calc(100vw - 24px);}}
-.token-result{margin-top:12px;padding:12px;border-radius:12px;background:rgba(51,209,122,0.1);border:1px solid rgba(51,209,122,0.3);display:none;}
-.token-result.show{display:block;}
-.token-result .token{font-family:'JetBrains Mono',monospace;font-size:18px;color:#33d17a;font-weight:700;letter-spacing:1px;}
+  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --void:#020308;
+    --deep:#060a14;
+    --blue:#2fb8ff;
+    --blue-hi:#8fe0ff;
+    --blue-dim:#0d7ab8;
+    --text-hi:#f2f7fb;
+    --text-lo:#7c8ba0;
+    --hairline:rgba(140,200,255,0.09);
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    min-height:100vh;
+    background:var(--void);
+    font-family:'Manrope',system-ui,sans-serif;
+    color:var(--text-hi);
+    position:relative;
+    overflow-x:hidden;
+  }
+
+  .field{position:fixed;inset:0;z-index:0;overflow:hidden;}
+  .blob{position:absolute;border-radius:50%;filter:blur(90px);opacity:0.35;mix-blend-mode:screen;}
+  .blob.a{width:60vw;height:60vw;max-width:520px;max-height:520px;top:-18%;left:-20%;background:radial-gradient(circle,var(--blue) 0%,transparent 70%);animation:drift1 26s ease-in-out infinite;}
+  .blob.b{width:50vw;height:50vw;max-width:460px;max-height:460px;bottom:-10%;right:-16%;background:radial-gradient(circle,#1a6fbf 0%,transparent 70%);animation:drift2 32s ease-in-out infinite;}
+  .blob.c{width:34vw;height:34vw;max-width:300px;max-height:300px;top:38%;left:58%;background:radial-gradient(circle,var(--blue-hi) 0%,transparent 70%);opacity:0.16;animation:drift3 22s ease-in-out infinite;}
+
+  @keyframes drift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(6%,8%) scale(1.08);}}
+  @keyframes drift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-5%,-6%) scale(1.05);}}
+  @keyframes drift3{0%,100%{transform:translate(0,0);}50%{transform:translate(-10%,10%);}}
+
+  .noise{position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0.025;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  .wrap{position:relative;z-index:2;width:100%;max-width:480px;min-height:100vh;margin:0 auto;padding:30px 20px;display:flex;flex-direction:column;justify-content:center;}
+  .wrap.wide{max-width:850px;}
+
+  header{margin-bottom:25px;text-align:center;}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:2.5px;color:var(--blue);text-transform:uppercase;margin-bottom:10px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--blue);box-shadow:0 0 8px 2px var(--blue);}
+
+  h1{font-size:28px;font-weight:800;letter-spacing:-1.1px;line-height:1.08;color:#fff;}
+  h1 span{background:linear-gradient(100deg,var(--blue-hi),var(--blue) 55%,var(--blue-dim));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  header p{margin-top:8px;font-size:13px;color:var(--text-lo);line-height:1.5;}
+
+  .glass{position:relative;background:linear-gradient(155deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015) 45%,rgba(120,190,255,0.02));border-radius:26px;backdrop-filter:blur(24px) saturate(140%);-webkit-backdrop-filter:blur(24px) saturate(140%);box-shadow:0 1px 0 rgba(255,255,255,0.18) inset,0 -1px 0 rgba(0,0,0,0.4) inset,0 24px 60px -20px rgba(0,0,0,0.75),0 0 0 1px rgba(255,255,255,0.06);padding:24px;margin-bottom:16px;}
+  .glass::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;background:conic-gradient(from 220deg at 30% 20%,rgba(255,255,255,0.55),rgba(255,255,255,0.02) 25%,rgba(47,184,255,0.35) 50%,rgba(255,255,255,0.02) 75%,rgba(255,255,255,0.4));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:0.9;}
+
+  .form-group{margin-bottom:16px;position:relative;z-index:2;}
+  .form-group label{display:block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:1px;color:var(--blue-hi);margin-bottom:6px;text-transform:uppercase;}
+  
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-clay{width:100%;padding:13px 44px 13px 16px;font-size:14px;background:rgba(2,3,8,0.4);border:1px solid var(--hairline);border-radius:14px;color:var(--text-hi);outline:none;transition:all 0.25s ease;font-family:'Manrope',inherit;}
+  .input-clay::placeholder{color:var(--text-lo);opacity:0.6;}
+  .input-clay:focus{border-color:rgba(47,184,255,0.5);box-shadow:0 0 15px rgba(47,184,255,0.15);}
+
+  .toggle-password {
+    position: absolute;
+    right: 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-lo);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    transition: color 0.2s;
+  }
+  .toggle-password:hover {
+    color: var(--blue-hi);
+  }
+  .toggle-password svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+  }
+
+  .checkbox-group{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-lo);margin-bottom:18px;cursor:pointer;}
+  .checkbox-group input{accent-color:var(--blue);width:16px;height:16px;}
+
+  .btn-activation{width:100%;font-family:'Manrope',inherit;cursor:pointer;border:none;font-size:15px;font-weight:700;padding:15px 20px;border-radius:16px;color:#00131f;background:linear-gradient(135deg,var(--blue-hi),var(--blue) 70%);box-shadow:0 8px 24px -6px rgba(47,184,255,0.55),inset 0 1px 0 rgba(255,255,255,0.6);transition:all 0.2s cubic-bezier(.2,.8,.3,1);display:flex;align-items:center;justify-content:center;min-height:50px;z-index:2;}
+  .btn-activation:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 10px 30px -6px rgba(47,184,255,0.75);}
+  .btn-activation:disabled{opacity:0.7;cursor:default;}
+
+  .btn-secondary{background:rgba(255,255,255,0.05);color:var(--text-hi);border:1px solid var(--hairline);margin-top:10px;}
+  .btn-secondary:hover{background:rgba(255,255,255,0.1);}
+
+  .auth-switch{text-align:center;margin-top:14px;font-size:13px;color:var(--text-lo);}
+  .auth-switch a{color:var(--blue-hi);text-decoration:none;font-weight:600;}
+  .auth-switch a:hover{text-decoration:underline;}
+
+  .error-msg{background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.3);color:#ff9e9e;padding:10px 14px;border-radius:12px;font-size:13px;margin-bottom:14px;display:none;text-align:center;}
+  .success-msg{background:rgba(47,184,255,0.1);border:1px solid rgba(47,184,255,0.3);color:var(--blue-hi);padding:10px 14px;border-radius:12px;font-size:13px;margin-bottom:14px;display:none;text-align:center;}
+  .show{display:block!important;}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px;}
+  .stat-card{background:rgba(255,255,255,0.03);border:1px solid var(--hairline);padding:14px;border-radius:14px;}
+  .stat-card .label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-lo);text-transform:uppercase;letter-spacing:1px;}
+  .stat-card .val{font-size:18px;font-weight:800;color:var(--blue-hi);margin-top:4px;}
+
+  .table-container{width:100%;overflow-x:auto;margin-top:10px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;text-align:left;}
+  th,td{padding:10px 12px;border-bottom:1px solid var(--hairline);white-space:nowrap;}
+  th{font-family:'JetBrains Mono',monospace;color:var(--blue-hi);font-weight:600;}
+  td{color:var(--text-hi);}
+  .badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;text-transform:uppercase;}
+  .badge.admin{background:rgba(255,100,100,0.15);color:#ff9e9e;border:1px solid rgba(255,100,100,0.3);}
+  .badge.member{background:rgba(47,184,255,0.15);color:var(--blue-hi);border:1px solid rgba(47,184,255,0.3);}
+
+  .action-btns{display:flex;gap:6px;}
+  .btn-xs{padding:4px 8px;font-size:11px;border-radius:6px;font-weight:600;cursor:pointer;border:none;}
+  .btn-blue{background:var(--blue);color:#000;}
+  .btn-green{background:#2ecc71;color:#fff;}
+
+  footer{text-align:center;margin-top:20px;}
+  footer .line{width:36px;height:1px;background:var(--hairline);margin:0 auto 10px;}
+  footer p{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--text-lo);text-transform:uppercase;}
+  footer b{color:var(--blue-hi);}
+
+  .hidden{display:none!important;}
 </style>
 </head>
 <body>
-<div class="field"><div class="blob a"></div><div class="blob b"></div><div class="blob c"></div></div>
+
+<div class="field">
+  <div class="blob a"></div>
+  <div class="blob b"></div>
+  <div class="blob c"></div>
+</div>
 <div class="noise"></div>
-<button class="theme-trigger" onclick="toggleThemePanel()" title="Pengaturan Tampilan"><svg viewBox="0 0 24 24"><path d="M12 2.25a9.75 9.75 0 1 0 9.75 9.75c0-.414-.033-.822-.098-1.223a.75.75 0 0 0-.854-.627 5.25 5.25 0 0 1-5.59-5.59.75.75 0 0 0-.627-.854A9.702 9.702 0 0 0 12 2.25Zm0 17.25a7.5 7.5 0 1 1 7.5-7.5c0 1.25-.303 2.433-.84 3.475a7.525 7.525 0 0 0-3.355-1.91.75.75 0 0 0-.61.127 5.25 5.25 0 0 1-7.147-7.147.75.75 0 0 0 .127-.61 7.525 7.525 0 0 0-1.91-3.355C4.567 9.447 4.5 10.63 4.5 11.85a7.5 7.5 0 0 0 7.5 7.5Z"/></svg><span>Tema</span></button>
-<div class="theme-panel" id="themePanel">
-<div class="panel-header"><span>Mode Tampilan</span></div>
-<div class="panel-section"><div class="mode-buttons"><button class="mode-toggle active" id="btnDark" onclick="setMode('dark')"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg> Gelap</button><button class="mode-toggle" id="btnLight" onclick="setMode('light')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> Terang</button></div></div>
-<div class="panel-header"><span>Warna Aksen</span></div>
-<div class="panel-section"><div class="swatch-grid" style="margin-bottom:10px;"><div class="swatch selected" style="background:#2fb8ff" onclick="setAccent('#2fb8ff','#8fe0ff','#0d7ab8', this)" title="Biru"></div><div class="swatch" style="background:#ff5da2" onclick="setAccent('#ff5da2','#ffb0d6','#c22b6f', this)" title="Pink"></div><div class="swatch" style="background:#7c5cff" onclick="setAccent('#7c5cff','#c3b3ff','#4c2fbf', this)" title="Ungu"></div><div class="swatch" style="background:#33d17a" onclick="setAccent('#33d17a','#a4f0c4','#1a8a4f', this)" title="Hijau"></div><div class="swatch" style="background:#ffb020" onclick="setAccent('#ffb020','#ffd98a','#c07800', this)" title="Kuning"></div></div>
-<button class="btn-custom-trigger" onclick="toggleCustomBuilder()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Atur Warna & Gradasi Sendiri</button>
-<div class="custom-builder" id="customBuilder"><div class="builder-row"><label>Warna Awal (Start)</label><div class="color-inputs-group"><div class="color-pick-box"><input type="color" id="gradStart" value="#8fe0ff" oninput="updateCustomGradient()"></div></div></div><div class="builder-row"><label>Warna Akhir (End)</label><div class="color-inputs-group"><div class="color-pick-box"><input type="color" id="gradEnd" value="#2fb8ff" oninput="updateCustomGradient()"></div></div></div><div class="preview-gradient-box" id="previewGradBox" style="background:linear-gradient(135deg, #8fe0ff, #2fb8ff);"></div></div></div></div>
-<div class="wrap">
-<div id="loginView" class="auth-view active">
-<header><div class="eyebrow">Akses Aman</div><h1>Masuk ke <span>ThanzDev</span></h1><p class="sub">Masuk menggunakan email dan password yang sudah terdaftar.</p></header>
-<div class="glass">
-<div class="form-group"><label for="loginEmail">Email</label><input id="loginEmail" type="email" class="input-clay" placeholder="username@thanzdev.temp" /></div>
-<div class="form-group"><label for="loginPassword">Kata Sandi</label><div class="pass-row"><input id="loginPassword" type="password" class="input-clay" placeholder="••••••••" /><span class="eye-toggle" onclick="togglePass('loginPassword','eyeIconLogin')"><svg id="eyeIconLogin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg></span></div></div>
-<div class="row-between"><label class="remember"><input type="checkbox" /> Ingat saya</label><a href="#" class="forgot">Lupa kata sandi?</a></div>
-<button class="btn-activation" onclick="handleLogin()">Masuk</button>
-<div class="divider">atau</div>
-<button class="btn-ghost" onclick="handleGitHub()"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg> Masuk dengan GitHub</button></div>
-<footer><div class="line"></div><p>Belum punya akun? <a onclick="switchAuthView('register')">Daftar sekarang</a></p></footer></div>
-<div id="registerView" class="auth-view">
-<header><div class="eyebrow">Bergabung Bersama Kami</div><h1>Buat Akun <span>ThanzDev</span></h1><p class="sub">Cukup isi username dan password, nanti kamu akan mendapatkan token unik.</p></header>
-<div class="glass">
-<div class="form-group"><label for="regUsername">Username</label><input id="regUsername" type="text" class="input-clay" placeholder="Masukkan username" /></div>
-<div class="form-group"><label for="regPassword">Kata Sandi</label><div class="pass-row"><input id="regPassword" type="password" class="input-clay" placeholder="••••••••" /><span class="eye-toggle" onclick="togglePass('regPassword','eyeIconReg')"><svg id="eyeIconReg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle></svg></span></div></div>
-<div class="form-group" style="margin-top:6px;"><label class="remember" style="font-size:12px;"><input type="checkbox" /> Saya menyetujui <a href="#" style="color:var(--accent-hi);margin-left:4px;">Syarat & Ketentuan</a></label></div>
-<button class="btn-activation" onclick="handleRegister()" style="margin-top:10px;">Buat Akun</button>
-<div id="registerResult" class="token-result"></div></div>
-<footer><div class="line"></div><p>Sudah punya akun? <a onclick="switchAuthView('login')">Masuk di sini</a></p></footer></div></div>
+
+<div class="wrap" id="mainWrap"></div>
+
 <script>
-function toggleThemePanel(){ document.getElementById('themePanel').classList.toggle('open'); }
-function toggleCustomBuilder(){ document.getElementById('customBuilder').classList.toggle('active'); }
-window.addEventListener('click', function(e){ const panel=document.getElementById('themePanel'); const trigger=document.querySelector('.theme-trigger'); if(!panel.contains(e.target)&&!trigger.contains(e.target)) panel.classList.remove('open'); });
-function switchAuthView(view){ const login=document.getElementById('loginView'); const reg=document.getElementById('registerView'); if(view==='register'){ login.classList.remove('active'); setTimeout(()=>reg.classList.add('active'),150); }else{ reg.classList.remove('active'); setTimeout(()=>login.classList.add('active'),150); } }
-function togglePass(inputId, iconId){ const input=document.getElementById(inputId); const icon=document.getElementById(iconId); if(input.type==='password'){ input.type='text'; icon.innerHTML='<path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a20.6 20.6 0 0 1 5.06-5.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 11 8 11 8a20.6 20.6 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>'; }else{ input.type='password'; icon.innerHTML='<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"></path><circle cx="12" cy="12" r="3"></circle>'; } }
-function setMode(mode){ document.documentElement.setAttribute('data-mode', mode); document.getElementById('btnDark').classList.toggle('active', mode==='dark'); document.getElementById('btnLight').classList.toggle('active', mode==='light'); }
-function hexToRgb(hex){ const v=hex.replace('#',''); const bigint=parseInt(v,16); return `${(bigint>>16)&255},${(bigint>>8)&255},${bigint&255}`; }
-function setAccent(base, hi, dim, el){ const root=document.documentElement.style; const grad=`linear-gradient(135deg, ${hi}, ${base})`; root.setProperty('--accent', base); root.setProperty('--accent-hi', hi); root.setProperty('--accent-dim', dim); root.setProperty('--accent-gradient', grad); root.setProperty('--card-tint', hexToRgb(base)); document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected')); if(el) el.classList.add('selected'); }
-function updateCustomGradient(){ const startHex=document.getElementById('gradStart').value; const endHex=document.getElementById('gradEnd').value; const gradCss=`linear-gradient(135deg, ${startHex}, ${endHex})`; document.getElementById('previewGradBox').style.background=gradCss; const root=document.documentElement.style; root.setProperty('--accent', endHex); root.setProperty('--accent-hi', startHex); root.setProperty('--accent-dim', startHex); root.setProperty('--accent-gradient', gradCss); root.setProperty('--card-tint', hexToRgb(endHex)); document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected')); }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = 'https://wkuxgnlanjrcmnfarpvj.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndrdXhnbmxhbmpyY21uZmFycHZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyNjE5NTYsImV4cCI6MjEwMjgzNzk1Nn0.Z0FtiNJCRgiTSbIgbN2a-iC7hbClAVDGTNW9Tc4c7tM';
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-window.supabase = supabase;
-console.log('Supabase siap');
+    const SUPABASE_URL = "https://rdzifudlvevdmrdzhmnv.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_O8XJn1dak4WP3pZYq6Os6g_bl4AljML";
 
-// ============================================================
-//  FUNGSI LOGIN
-// ============================================================
-function handleLogin() {
-    var email = document.getElementById('loginEmail').value.trim();
-    var password = document.getElementById('loginPassword').value.trim();
-    if (!email || !password) { alert('Isi email dan password'); return; }
-    var btn = document.querySelector('#loginView .btn-activation');
-    btn.textContent = 'Memproses...';
-    btn.disabled = true;
-    supabase.auth.signInWithPassword({ email, password })
-        .then(function(result) {
-            if (result.error) throw result.error;
-            if (result.data.user) {
-                localStorage.setItem('thanzdev_user', JSON.stringify({ id: result.data.user.id, email: result.data.user.email }));
-                alert('✅ Login berhasil!');
-                window.location.href = '/fitur.html';
-            }
-        })
-        .catch(function(err) {
-            alert('❌ Login gagal: ' + err.message);
-            btn.textContent = 'Masuk';
-            btn.disabled = false;
-        });
-}
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const API_BASE = 'https://restapidhan.vercel.app';
+    const GLOBAL_API_KEY = 'ISAAW-PRW70Z4Z';
 
-// ============================================================
-//  FUNGSI REGISTER (SUDAH DIPERBAIKI)
-// ============================================================
-function handleRegister() {
-    var username = document.getElementById('regUsername').value.trim();
-    var password = document.getElementById('regPassword').value.trim();
-    var resultDiv = document.getElementById('registerResult');
-    resultDiv.classList.remove('show');
-    resultDiv.innerHTML = '';
-
-    // Validasi
-    if (!username || !password) { alert('Harap isi username dan password'); return; }
-    if (password.length < 6) { alert('Password minimal 6 karakter'); return; }
-    if (username.length < 3) { alert('Username minimal 3 karakter'); return; }
-
-    var btn = document.querySelector('#registerView .btn-activation');
-    btn.textContent = 'Memproses...';
-    btn.disabled = true;
-
-    var email = username + '@thanzdev.temp';
-
-    // Step 1: Sign up ke Supabase Auth
-    supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: { data: { display_name: username } }
-    })
-    .then(function(result) {
-        if (result.error) throw result.error;
-        if (result.data.user) {
-            // ✅ TRIGGER otomatis akan membuat record di tabel users
-            // Kita tinggal generate token THANZ dan update kolom username
-            var userId = result.data.user.id;
-            var token = 'THANZ-' + Math.random().toString(36).substring(2, 7).toUpperCase();
-
-            // Step 2: Update kolom username dengan token (gunakan RLS, user sudah login)
-            return supabase
-                .from('users')
-                .update({ username: token })
-                .eq('auth_id', userId)
-                .then(function(updateResult) {
-                    // ✅ Jika update gagal, TIDAK MASALAH karena trigger sudah buat record
-                    // Tapi kita tetap tampilkan token
-                    if (updateResult.error) {
-                        console.warn('Update token gagal, tapi user sudah terdaftar:', updateResult.error);
-                    }
-                    resultDiv.innerHTML = '<div style="font-weight:600;margin-bottom:4px;">✅ Pendaftaran berhasil!</div><div style="font-size:13px;color:var(--text-lo);">Token unik kamu:</div><div class="token">'+token+'</div><div style="font-size:12px;color:var(--text-lo);margin-top:8px;">Gunakan token ini untuk login atau keperluan lainnya.</div>';
-                    resultDiv.classList.add('show');
-                    document.getElementById('regUsername').value = '';
-                    document.getElementById('regPassword').value = '';
-                    btn.textContent = 'Buat Akun';
-                    btn.disabled = false;
-                    alert('✅ Pendaftaran berhasil! Token kamu: ' + token);
-                    switchAuthView('login');
-                    document.getElementById('loginEmail').value = email;
-                });
-        }
-    })
-    .catch(function(err) {
-        alert('❌ Register gagal: ' + err.message);
-        btn.textContent = 'Buat Akun';
-        btn.disabled = false;
-    });
-}
-
-// ============================================================
-//  FUNGSI GITHUB
-// ============================================================
-function handleGitHub() {
-    supabase.auth.signInWithOAuth({
-        provider: 'github',
-        options: { redirectTo: window.location.origin + '/fitur.html' }
-    }).catch(function(err) { alert('❌ GitHub error: ' + err.message); });
-}
-
-// ============================================================
-//  CEK SESSION
-// ============================================================
-supabase.auth.getSession().then(function(result) {
-    if (result.data.session) {
-        localStorage.setItem('thanzdev_user', JSON.stringify({
-            id: result.data.session.user.id,
-            email: result.data.session.user.email
-        }));
-        window.location.href = '/fitur.html';
+    let deviceId = localStorage.getItem('thanzdev_device_id');
+    if (!deviceId) {
+        deviceId = crypto.randomUUID();
+        localStorage.setItem('thanzdev_device_id', deviceId);
     }
-}).catch(function(e) { console.log(e); });
 
-window.handleLogin = handleLogin;
-window.handleRegister = handleRegister;
-window.handleGitHub = handleGitHub;
-console.log('✅ Semua fungsi siap.');
+    let currentUser = null;
+    let currentProfile = null;
+    let currentView = 'loading';
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        await checkAuthSession();
+    });
+
+    async function checkAuthSession() {
+        try {
+            const { data: { session } } = await supabaseClient.auth.getSession();
+            if (session && session.user) {
+                currentUser = session.user;
+                await fetchProfile(currentUser.id);
+            } else {
+                currentView = 'login';
+            }
+        } catch (e) {
+            currentView = 'login';
+        }
+        render();
+    }
+
+    async function fetchProfile(userId) {
+        const { data } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (data) {
+            currentProfile = data;
+            currentView = (data.role === 'admin') ? 'admin_dashboard' : 'user_dashboard';
+        } else {
+            currentView = 'login';
+        }
+    }
+
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+        if (session && session.user) {
+            currentUser = session.user;
+            await fetchProfile(currentUser.id);
+            render();
+        } else {
+            currentUser = null;
+            currentProfile = null;
+            currentView = 'login';
+            render();
+        }
+    });
+
+    function render() {
+        const wrap = document.getElementById('mainWrap');
+        wrap.className = (currentView === 'admin_dashboard') ? 'wrap wide' : 'wrap';
+
+        if (currentView === 'loading') {
+            wrap.innerHTML = `<div style="text-align:center;color:var(--text-lo);font-family:'JetBrains Mono';">Memuat ThanzDev Portal...</div>`;
+            return;
+        }
+
+        if (currentView === 'login') {
+            wrap.innerHTML = renderLoginView();
+            initLoginEvents();
+        } else if (currentView === 'register') {
+            wrap.innerHTML = renderRegisterView();
+            initRegisterEvents();
+        } else if (currentView === 'forgot') {
+            wrap.innerHTML = renderForgotView();
+            initForgotEvents();
+        } else if (currentView === 'user_dashboard') {
+            wrap.innerHTML = renderUserDashboardView();
+            initUserDashboardEvents();
+        } else if (currentView === 'admin_dashboard') {
+            wrap.innerHTML = renderAdminDashboardView();
+            initAdminDashboardEvents();
+        }
+    }
+
+    function renderLoginView() {
+        return `
+          <header>
+            <div class="eyebrow">ThanzDev Portal</div>
+            <h1>Masuk <span>Akun</span></h1>
+            <p>Silakan masuk ke ThanzDev menggunakan email & password Anda.</p>
+          </header>
+          <div class="glass">
+            <div id="alertBox" class="error-msg"></div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" class="input-clay" placeholder="nama@email.com" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="loginPassword" class="input-clay" placeholder="••••••••" />
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('loginPassword', this)">
+                        <svg class="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;font-size:12px;">
+                <label class="checkbox-group" style="margin:0;"><input type="checkbox" id="rememberMe"> Ingat saya</label>
+                <a href="#" id="linkForgot" style="color:var(--blue-hi);text-decoration:none;">Lupa kata sandi?</a>
+            </div>
+            <button id="btnLogin" class="btn-activation">Masuk Sekarang</button>
+          </div>
+          <div class="auth-switch">Belum punya akun? <a href="#" id="linkRegister">Daftar sekarang</a></div>
+          <footer><div class="line"></div><p>ThanzDev · <b>#2FB8FF</b> Liquid System</p></footer>
+        `;
+    }
+
+    function renderRegisterView() {
+        return `
+          <header>
+            <div class="eyebrow">ThanzDev Portal</div>
+            <h1>Daftar <span>Akun Baru</span></h1>
+            <p>Bergabung dengan portal member eksklusif ThanzDev.</p>
+          </header>
+          <div class="glass">
+            <div id="alertBox" class="error-msg"></div>
+            <div id="successBox" class="success-msg"></div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="regUsername" class="input-clay" placeholder="username unik" />
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="regEmail" class="input-clay" placeholder="nama@email.com" />
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="regPassword" class="input-clay" placeholder="••••••••" />
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regPassword', this)">
+                        <svg class="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Konfirmasi Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="regConfirm" class="input-clay" placeholder="••••••••" />
+                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('regConfirm', this)">
+                        <svg class="eye-icon" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    </button>
+                </div>
+            </div>
+            <label class="checkbox-group"><input type="checkbox" id="regTerms"> Saya menyetujui Syarat & Ketentuan</label>
+            <button id="btnRegister" class="btn-activation">Buat Akun</button>
+          </div>
+          <div class="auth-switch">Sudah punya akun? <a href="#" id="linkLogin">Masuk disini</a></div>
+          <footer><div class="line"></div><p>ThanzDev · <b>#2FB8FF</b> Liquid System</p></footer>
+        `;
+    }
+
+    function renderForgotView() {
+        return `
+          <header>
+            <div class="eyebrow">ThanzDev Portal</div>
+            <h1>Reset <span>Password</span></h1>
+            <p>Pulihkan akses akun ThanzDev Anda via email.</p>
+          </header>
+          <div class="glass">
+            <div id="alertBox" class="error-msg"></div>
+            <div id="successBox" class="success-msg"></div>
+            <div class="form-group">
+                <label>Email Akun</label>
+                <input type="email" id="forgotEmail" class="input-clay" placeholder="nama@email.com" />
+            </div>
+            <button id="btnForgot" class="btn-activation">Kirim Reset Link</button>
+          </div>
+          <div class="auth-switch"><a href="#" id="linkLogin">Kembali ke Login</a></div>
+          <footer><div class="line"></div><p>ThanzDev · <b>#2FB8FF</b> Liquid System</p></footer>
+        `;
+    }
+
+    function renderUserDashboardView() {
+        const totalCredit = (currentProfile?.daily_credit || 0) + (currentProfile?.bonus_credit || 0);
+        return `
+          <header>
+            <div class="eyebrow">ThanzDev Member Dashboard</div>
+            <h1>Halo, <span>${currentProfile?.username || 'Member'}</span></h1>
+            <p>Gunakan layanan premium ThanzDev dengan sistem kredit terintegrasi.</p>
+          </header>
+
+          <div class="glass">
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="label">Role Akun</div>
+                <div class="val" style="text-transform:uppercase;font-size:14px;margin-top:6px;">${currentProfile?.role}</div>
+              </div>
+              <div class="stat-card">
+                <div class="label">Total Credit</div>
+                <div class="val">${totalCredit} / 3</div>
+              </div>
+            </div>
+            <div style="font-family:'JetBrains Mono';font-size:11px;color:var(--text-lo);text-align:center;margin-bottom:15px;">
+              Daily: ${currentProfile?.daily_credit} | Bonus: ${currentProfile?.bonus_credit}<br>
+              Reset 24J: <span id="resetTimer" style="color:var(--blue-hi);">Menghitung...</span>
+            </div>
+            <button id="btnLogout" class="btn-activation btn-secondary" style="margin-top:0;">Keluar Akun</button>
+          </div>
+
+          <div class="glass">
+            <div style="font-family:'JetBrains Mono';font-size:11px;color:var(--blue-hi);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">Fitur Utama: ThanzDev Alight Motion</div>
+            <div id="featureAlert" class="error-msg"></div>
+            <div id="featureSuccess" class="success-msg"></div>
+            <div class="form-group">
+                <label>Email Akun Target</label>
+                <div style="display:flex;gap:8px;">
+                    <input type="email" id="amEmail" class="input-clay" placeholder="email target..." />
+                    <button id="btnSendLink" class="btn-activation" style="width:110px;font-size:13px;padding:0;">Send</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Magic Link Verifikasi</label>
+                <input type="url" id="amMagic" class="input-clay" placeholder="tempel magic link..." />
+            </div>
+            <button id="btnActivateAM" class="btn-activation">Aktivasi Sekarang (-1 Credit)</button>
+          </div>
+
+          <footer><div class="line"></div><p>ThanzDev · <b>#2FB8FF</b> Liquid System</p></footer>
+        `;
+    }
+
+    function renderAdminDashboardView() {
+        return `
+          <header>
+            <div class="eyebrow">ThanzDev Admin Panel</div>
+            <h1>Manajemen <span>System</span></h1>
+            <p>Pantau seluruh member ThanzDev dan kelola kredit dengan aman.</p>
+          </header>
+
+          <div class="glass">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+              <div style="font-family:'JetBrains Mono';font-size:12px;color:var(--blue-hi);">Daftar Pengguna ThanzDev</div>
+              <button id="btnAdminLogout" class="btn-xs btn-blue" style="padding:6px 12px;">Logout Admin</button>
+            </div>
+            <div class="table-container">
+              <table id="adminUserTable">
+                <thead>
+                  <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Credit (D+B)</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody id="adminTableBody">
+                  <tr><td colspan="5" style="text-align:center;color:var(--text-lo);">Memuat data...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <footer><div class="line"></div><p>ThanzDev · <b>#2FB8FF</b> Admin System</p></footer>
+        `;
+    }
+
+    window.togglePasswordVisibility = function(fieldId, btn) {
+        const input = document.getElementById(fieldId);
+        if (!input) return;
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`;
+        } else {
+            input.type = 'password';
+            btn.innerHTML = `<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
+        }
+    };
+
+    function initLoginEvents() {
+        document.getElementById('linkRegister').addEventListener('click', (e) => { e.preventDefault(); currentView='register'; render(); });
+        document.getElementById('linkForgot').addEventListener('click', (e) => { e.preventDefault(); currentView='forgot'; render(); });
+        
+        document.getElementById('btnLogin').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+            const alertBox = document.getElementById('alertBox');
+            alertBox.classList.remove('show');
+
+            if (!email || !password) {
+                alertBox.textContent = 'Email dan password wajib diisi!';
+                alertBox.classList.add('show');
+                return;
+            }
+
+            const btn = document.getElementById('btnLogin');
+            btn.textContent = 'Memproses...';
+            btn.disabled = true;
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
+                    alertBox.textContent = error.message;
+                    alertBox.classList.add('show');
+                    btn.textContent = 'Masuk Sekarang';
+                    btn.disabled = false;
+                } else if (data && data.session) {
+                    currentUser = data.session.user;
+                    await fetchProfile(currentUser.id);
+                    render();
+                }
+            } catch (err) {
+                alertBox.textContent = 'Terjadi kesalahan sistem.';
+                alertBox.classList.add('show');
+                btn.textContent = 'Masuk Sekarang';
+                btn.disabled = false;
+            }
+        });
+    }
+
+    function initRegisterEvents() {
+        document.getElementById('linkLogin').addEventListener('click', (e) => { e.preventDefault(); currentView='login'; render(); });
+
+        document.getElementById('btnRegister').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const confirm = document.getElementById('regConfirm').value.trim();
+            const terms = document.getElementById('regTerms').checked;
+            const alertBox = document.getElementById('alertBox');
+            const successBox = document.getElementById('successBox');
+            alertBox.classList.remove('show');
+            successBox.classList.remove('show');
+
+            if (!username || !email || !password) {
+                alertBox.textContent = 'Semua field wajib diisi!';
+                alertBox.classList.add('show');
+                return;
+            }
+            if (password !== confirm) {
+                alertBox.textContent = 'Konfirmasi password tidak cocok!';
+                alertBox.classList.add('show');
+                return;
+            }
+            if (!terms) {
+                alertBox.textContent = 'Anda harus menyetujui Syarat & Ketentuan!';
+                alertBox.classList.add('show');
+                return;
+            }
+
+            const { data: existingDevice } = await supabaseClient
+                .from('user_devices')
+                .select('*')
+                .eq('device_id', deviceId)
+                .single();
+
+            if (existingDevice) {
+                alertBox.textContent = 'Device ini sudah pernah digunakan untuk membuat akun. (1 Device = 1 Akun)';
+                alertBox.classList.add('show');
+                return;
+            }
+
+            const btn = document.getElementById('btnRegister');
+            btn.textContent = 'Membuat Akun...';
+            btn.disabled = true;
+
+            const { data, error } = await supabaseClient.auth.signUp({
+                email,
+                password,
+                options: { data: { username } }
+            });
+
+            if (error) {
+                alertBox.textContent = error.message;
+                alertBox.classList.add('show');
+                btn.textContent = 'Buat Akun';
+                btn.disabled = false;
+                return;
+            }
+
+            if (data && data.user) {
+                await supabaseClient
+                    .from('user_devices')
+                    .insert([{ device_id: deviceId, user_id: data.user.id }]);
+
+                successBox.textContent = 'Akun ThanzDev berhasil dibuat! Mengalihkan ke login...';
+                successBox.classList.add('show');
+                
+                setTimeout(() => {
+                    currentView = 'login';
+                    render();
+                }, 2000);
+            }
+        });
+    }
+
+    function initForgotEvents() {
+        document.getElementById('linkLogin').addEventListener('click', (e) => { e.preventDefault(); currentView='login'; render(); });
+
+        document.getElementById('btnForgot').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgotEmail').value.trim();
+            const alertBox = document.getElementById('alertBox');
+            const successBox = document.getElementById('successBox');
+            alertBox.classList.remove('show');
+            successBox.classList.remove('show');
+
+            if (!email) {
+                alertBox.textContent = 'Masukkan email Anda!';
+                alertBox.classList.add('show');
+                return;
+            }
+
+            const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin
+            });
+
+            if (error) {
+                alertBox.textContent = error.message;
+                alertBox.classList.add('show');
+            } else {
+                successBox.textContent = 'Instruksi reset password telah dikirim ke email.';
+                successBox.classList.add('show');
+            }
+        });
+    }
+
+    function initUserDashboardEvents() {
+        document.getElementById('btnLogout').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+        });
+
+        if (currentProfile && currentProfile.credit_reset_at) {
+            const resetTime = new Date(currentProfile.credit_reset_at).getTime();
+            setInterval(() => {
+                const now = new Date().getTime();
+                const distance = resetTime - now;
+                const timerEl = document.getElementById('resetTimer');
+                if (!timerEl) return;
+                if (distance < 0) {
+                    timerEl.textContent = 'Waktu reset tercapai (Refresh halaman)';
+                } else {
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                    timerEl.textContent = `${hours}j ${minutes}m ${seconds}d`;
+                }
+            }, 1000);
+        }
+
+        let cachedEmail = '';
+        const amEmail = document.getElementById('amEmail');
+        const amMagic = document.getElementById('amMagic');
+        const btnSendLink = document.getElementById('btnSendLink');
+        const btnActivateAM = document.getElementById('btnActivateAM');
+        const featureAlert = document.getElementById('featureAlert');
+        const featureSuccess = document.getElementById('featureSuccess');
+
+        btnSendLink.addEventListener('click', async () => {
+            const email = amEmail.value.trim();
+            featureAlert.classList.remove('show');
+            if (!email) {
+                featureAlert.textContent = 'Masukkan email tujuan!';
+                featureAlert.classList.add('show');
+                return;
+            }
+            btnSendLink.textContent = '...';
+            try {
+                const res = await fetch(`${API_BASE}/api/am?action=send&apikey=${GLOBAL_API_KEY}&email=${encodeURIComponent(email)}`);
+                const data = await res.json();
+                if (data.status || data.code === 200) {
+                    cachedEmail = email;
+                    btnSendLink.textContent = '✓ Terkirim';
+                    setTimeout(() => btnSendLink.textContent = 'Send', 2000);
+                } else {
+                    cachedEmail = email;
+                    btnSendLink.textContent = '✓ Terkirim';
+                    setTimeout(() => btnSendLink.textContent = 'Send', 2000);
+                }
+            } catch (err) {
+                cachedEmail = email;
+                btnSendLink.textContent = '✓ Terkirim';
+                setTimeout(() => btnSendLink.textContent = 'Send', 2000);
+            }
+        });
+
+        btnActivateAM.addEventListener('click', async () => {
+            featureAlert.classList.remove('show');
+            featureSuccess.classList.remove('show');
+
+            const email = amEmail.value.trim() || cachedEmail;
+            const magic = amMagic.value.trim();
+
+            if (!email || !magic) {
+                featureAlert.textContent = 'Email dan Magic Link wajib diisi!';
+                featureAlert.classList.add('show');
+                return;
+            }
+
+            const { data: rpcData, error: rpcError } = await supabaseClient.rpc('consume_credit', {
+                p_user_id: currentUser.id
+            });
+
+            if (rpcError || !rpcData.success) {
+                featureAlert.textContent = rpcData?.message || 'Credit kamu sudah habis atau terjadi kesalahan.';
+                featureAlert.classList.add('show');
+                return;
+            }
+
+            currentProfile.daily_credit = rpcData.daily_credit;
+            currentProfile.bonus_credit = rpcData.bonus_credit;
+
+            btnActivateAM.textContent = 'Memproses Aktivasi...';
+            btnActivateAM.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/api/am?action=verif&apikey=${GLOBAL_API_KEY}&email=${encodeURIComponent(email)}&url=${encodeURIComponent(magic)}`);
+                const data = await res.json();
+
+                if (data.status || data.code === 200) {
+                    featureSuccess.textContent = 'Aktivasi ThanzDev AM Premium Berhasil!';
+                    featureSuccess.classList.add('show');
+                    btnActivateAM.textContent = 'Aktivasi Sekarang (-1 Credit)';
+                    btnActivateAM.disabled = false;
+                    render();
+                } else {
+                    await supabaseClient.rpc('admin_add_credit', { p_target_user_id: currentUser.id, p_amount: 1 });
+                    featureAlert.textContent = 'Aktivasi gagal. Credit dikembalikan.';
+                    featureAlert.classList.add('show');
+                    btnActivateAM.textContent = 'Aktivasi Sekarang (-1 Credit)';
+                    btnActivateAM.disabled = false;
+                }
+            } catch (err) {
+                await supabaseClient.rpc('admin_add_credit', { p_target_user_id: currentUser.id, p_amount: 1 });
+                featureAlert.textContent = 'Terjadi kesalahan sistem. Credit dikembalikan.';
+                featureAlert.classList.add('show');
+                btnActivateAM.textContent = 'Aktivasi Sekarang (-1 Credit)';
+                btnActivateAM.disabled = false;
+            }
+        });
+    }
+
+    function initAdminDashboardEvents() {
+        document.getElementById('btnAdminLogout').addEventListener('click', async () => {
+            await supabaseClient.auth.signOut();
+        });
+
+        loadAdminUsers();
+    }
+
+    async function loadAdminUsers() {
+        const tbody = document.getElementById('adminTableBody');
+        const { data } = await supabaseClient
+            .from('profiles')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (!data) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#ff9e9e;">Gagal memuat data member ThanzDev.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+        data.forEach(user => {
+            const total = user.daily_credit + user.bonus_credit;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><b>${user.username}</b></td>
+                <td style="color:var(--text-lo);">${user.id.substring(0,8)}...</td>
+                <td><span class="badge ${user.role}">${user.role}</span></td>
+                <td>${total} (D:${user.daily_credit} + B:${user.bonus_credit})</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-xs btn-blue" onclick="promptAddCredit('${user.id}')">+Bonus</button>
+                        <button class="btn-xs btn-green" onclick="promptChangeRole('${user.id}', '${user.role}')">Role</button>
+                    </div>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    window.promptAddCredit = async function(userId) {
+        const amount = prompt("Masukkan jumlah bonus credit ThanzDev yang ingin ditambahkan:", "3");
+        if (!amount || isNaN(amount)) return;
+
+        const { data } = await supabaseClient.rpc('admin_add_credit', {
+            p_target_user_id: userId,
+            p_amount: parseInt(amount)
+        });
+
+        if (!data || !data.success) {
+            alert(data?.message || 'Gagal menambah credit.');
+        } else {
+            alert('Berhasil menambahkan bonus credit!');
+            loadAdminUsers();
+        }
+    };
+
+    window.promptChangeRole = async function(userId, currentRole) {
+        const newRole = prompt("Ubah role (ketik: member / admin):", currentRole);
+        if (!newRole || (newRole !== 'member' && newRole !== 'admin')) return;
+
+        const { data } = await supabaseClient.rpc('admin_change_role', {
+            p_target_user_id: userId,
+            p_new_role: newRole
+        });
+
+        if (!data || !data.success) {
+            alert(data?.message || 'Gagal mengubah role.');
+        } else {
+            alert('Role berhasil diubah!');
+            loadAdminUsers();
+        }
+    };
 </script>
+
 </body>
-                                                                                                                           </html>
+</html>
