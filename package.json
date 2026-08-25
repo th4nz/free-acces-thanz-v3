@@ -1,14 +1,12 @@
 {
-  "name": "thanzdev-project",
+  "name": "thanzdev-portal",
   "version": "1.0.0",
-  "description": "ThanzDev — Generate AM Premium + Admin Dashboard",
-  "main": "index.html",
+  "description": "ThanzDev Portal Pengguna with Liquid Glass Theme & Supabase Auth",
+  "private": true,
   "scripts": {
-    "dev": "vercel dev"
+    "start": "serve . -p 3000"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.45.0",
-    "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2"
+    "@supabase/supabase-js": "^2.39.8"
   }
 }
